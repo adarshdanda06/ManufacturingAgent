@@ -1,0 +1,30 @@
+{
+  "description": "Station defect code taxonomy. The agent must report a root cause using one of these codes. Names only; no symptom descriptions, so the failure library still carries the diagnostic knowledge.",
+  "codes": [
+    {"code": "HEALTHY", "name": "No fault found, unit passes"},
+    {"code": "UNKNOWN", "name": "Fault present but root cause not identified"},
+    {"code": "MOTOR_DEAD", "name": "Dead motor"},
+    {"code": "MOTOR_BEARING_DEGRADED", "name": "Degraded motor bearing"},
+    {"code": "MOTOR_WINDING_SHORT", "name": "Motor winding short"},
+    {"code": "MOTOR_MAGNET_DEMAG", "name": "Demagnetized motor rotor"},
+    {"code": "PROP_IMBALANCE", "name": "Propeller imbalance"},
+    {"code": "ESC_DESYNC", "name": "ESC commutation desync"},
+    {"code": "ESC_THERMAL_DERATE", "name": "ESC thermal derating"},
+    {"code": "CAN_TERMINATION_MISSING", "name": "Missing CAN bus terminator"},
+    {"code": "CAN_STUB_DAMAGED", "name": "Damaged CAN stub wire"},
+    {"code": "IMU_GYRO_MISCAL", "name": "Miscalibrated gyro"},
+    {"code": "IMU_SENSOR_FAULT", "name": "Failing IMU sensor"},
+    {"code": "IMU_MOUNT_LOOSE", "name": "Loose IMU mount"},
+    {"code": "I2C_CONNECTOR_LOOSE", "name": "Loose I2C connector"},
+    {"code": "UART_CONNECTOR_DAMAGED", "name": "Damaged UART connector"},
+    {"code": "BATTERY_WEAK_CELL", "name": "Weak battery cell"},
+    {"code": "BATTERY_HIGH_IR", "name": "Aged pack, high internal resistance"},
+    {"code": "BATTERY_CONNECTOR_HIGH_RESISTANCE", "name": "High resistance battery connector"},
+    {"code": "CAMERA_RIBBON_FAULT", "name": "Camera ribbon cable fault"},
+    {"code": "CAMERA_SENSOR_DEAD", "name": "Dead camera sensor"},
+    {"code": "CAMERA_FIRMWARE_MISMATCH", "name": "Camera firmware mismatch"},
+    {"code": "COMPASS_INTERFERENCE", "name": "Compass interference from wiring"},
+    {"code": "COMPASS_HARD_IRON", "name": "Compass hard-iron distortion"},
+    {"code": "FIXTURE_MAGNETIC_CONTAMINATION", "name": "Magnetic contamination at the test fixture"}
+  ]
+}
