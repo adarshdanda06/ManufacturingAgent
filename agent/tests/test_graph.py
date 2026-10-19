@@ -195,5 +195,6 @@ def test_write_trace(tmp_path: Any, transport: RecordingTransport) -> None:
 
 def test_gemini_requires_api_key(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
     with pytest.raises(LLMError):
         GeminiLLM()
