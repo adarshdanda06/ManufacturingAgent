@@ -6,7 +6,7 @@ expose it. The agent only ever talks to the station.
 
 Layout it reads (see ``eval/run_eval.py`` and ``agent/graph.py``)::
 
-    <results_dir>/<eval name>/results.json
+    <results_dir>/<eval name>/results.json        (name may be nested, e.g. model/mode)
     <results_dir>/<eval name>/runs/<mode>/<run_id>.json
     <results_dir>/runs/<run_id>.json          single agent CLI runs
 
@@ -43,10 +43,38 @@ def _results_dir() -> Path:
     return path
 
 
+MAX_DEPTH = 3
+
+
 def _safe(name: str) -> str:
     if not _SAFE.match(name) or ".." in name:
         abort(404)
     return name
+
+
+def _eval_dir(name: str) -> Path:
+    """Resolve a possibly nested eval name such as ``gemini-3.5-flash-lite/library``."""
+    parts = name.split("/")
+    if len(parts) > MAX_DEPTH:
+        abort(404)
+    return _results_dir().joinpath(*(_safe(p) for p in parts))
+
+
+def _find_evals(root: Path) -> list[Path]:
+    """Directories under ``root`` (up to ``MAX_DEPTH`` deep) holding a ``results.json``."""
+    found, frontier = [], [root]
+    for _ in range(MAX_DEPTH):
+        nxt = []
+        for d in frontier:
+            for c in d.iterdir():
+                if not c.is_dir() or not _SAFE.match(c.name) or (d == root and c.name == CLI_RUNS):
+                    continue
+                if (c / "results.json").is_file():
+                    found.append(c)
+                else:
+                    nxt.append(c)
+        frontier = nxt
+    return found
 
 
 def _read_json(path: Path) -> Any:
@@ -80,28 +108,26 @@ def list_evals() -> Any:
     rows = []
     root = _results_dir()
     if root.is_dir():
-        for d in root.iterdir():
-            f = d / "results.json"
-            if d.is_dir() and _SAFE.match(d.name) and f.is_file():
-                try:
-                    rows.append(eval_summary(d.name, json.loads(f.read_text())))
-                except json.JSONDecodeError:
-                    continue
+        for d in _find_evals(root):
+            try:
+                rows.append(eval_summary(d.relative_to(root).as_posix(), json.loads((d / "results.json").read_text())))
+            except json.JSONDecodeError:
+                continue
     rows.sort(key=lambda r: r["created_at"] or "", reverse=True)
     return jsonify({"evals": rows})
 
 
-@bp.get("/evals/<name>")
-def get_eval(name: str) -> Any:
-    """Return one eval's full ``results.json``."""
-    return jsonify(_read_json(_results_dir() / _safe(name) / "results.json"))
-
-
-@bp.get("/evals/<name>/runs/<mode>/<run_id>")
+@bp.get("/evals/<path:name>/runs/<mode>/<run_id>")
 def get_eval_run(name: str, mode: str, run_id: str) -> Any:
     """Return one run trace from an eval, including ground truth and score."""
-    path = _results_dir() / _safe(name) / "runs" / _safe(mode) / f"{_safe(run_id)}.json"
+    path = _eval_dir(name) / "runs" / _safe(mode) / f"{_safe(run_id)}.json"
     return jsonify(_read_json(path))
+
+
+@bp.get("/evals/<path:name>")
+def get_eval(name: str) -> Any:
+    """Return one eval's full ``results.json``."""
+    return jsonify(_read_json(_eval_dir(name) / "results.json"))
 
 
 @bp.get("/traces")

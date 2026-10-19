@@ -31,7 +31,7 @@ The agent never sees the fault. Only the eval harness knows ground truth, and it
 
 ## Results
 
-Real output of `eval/run_eval.py` with `gemini-3.5-flash-lite` on the Gemini free tier, run 2026-10-19. 30 units, two of each of the 15 labels, seed 7, a limit of 12 tool calls and 180 s of station test time per unit (running the full suite takes 210 s).
+Real output of `eval/run_eval.py` (committed in `eval/results/gemini-3.5-flash-lite/library/`) with `gemini-3.5-flash-lite` on the Gemini free tier, run 2026-10-19. 30 units, two of each of the 15 labels, seed 7, a limit of 12 tool calls and 180 s of station test time per unit (running the full suite takes 210 s).
 
 | Metric | With failure library |
 |---|---|

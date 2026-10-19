@@ -1,0 +1,656 @@
+{
+  "run_id": "library-0024",
+  "unit_id": "U-3d194eeafd",
+  "agent": {
+    "model": "gemini-3.5-flash-lite",
+    "config": {
+      "max_steps": 12,
+      "time_budget_s": 180.0,
+      "use_library": true,
+      "retriever": "bm25",
+      "top_k": 3
+    }
+  },
+  "started_at": "2026-10-19T18:37:52.052349+00:00",
+  "duration_s": 222.564,
+  "stop_reason": "proposed",
+  "final": {
+    "root_cause": "MOTOR_BEARING_DEGRADED",
+    "confidence": 0.85,
+    "recommended_rework": {
+      "action": "replace_motor",
+      "target": "motor_1"
+    },
+    "evidence": [
+      {
+        "step": 9,
+        "test_name": "motor_spin_test",
+        "run_index": 0,
+        "passed": false,
+        "failures": [
+          "motor_1 current 5.58 A outside 3.4-5.0"
+        ],
+        "readings": {
+          "motors": [
+            {
+              "rpm": 9007.0,
+              "rpm_jitter": 72.0,
+              "temp_c": 53.4,
+              "current_a": 5.58,
+              "motor": "motor_1"
+            },
+            {
+              "rpm": 9483.0,
+              "rpm_jitter": 29.0,
+              "temp_c": 41.9,
+              "current_a": 4.26,
+              "motor": "motor_2"
+            },
+            {
+              "rpm": 9093.0,
+              "rpm_jitter": 19.0,
+              "temp_c": 41.3,
+              "current_a": 4.18,
+              "motor": "motor_3"
+            },
+            {
+              "rpm": 9431.0,
+              "rpm_jitter": 17.0,
+              "temp_c": 42.9,
+              "current_a": 4.21,
+              "motor": "motor_4"
+            }
+          ],
+          "throttle_pct": 50.0
+        }
+      }
+    ]
+  },
+  "rework_result": {
+    "unit_id": "U-3d194eeafd",
+    "action": "replace_motor",
+    "target": "motor_1",
+    "suite_passed": true,
+    "cost_s": 300.0,
+    "failing_tests": [],
+    "applied": true
+  },
+  "totals": {
+    "tool_calls": 11,
+    "tests_run": 8,
+    "test_time_s": 110.0,
+    "llm_calls": 20,
+    "input_tokens": 51080,
+    "output_tokens": 2347
+  },
+  "errors": [],
+  "steps": [
+    {
+      "step": 1,
+      "thought": "I will list all available tests on the station to understand what diagnostic tools can be used to evaluate the drone subsystems.",
+      "tool": "list_tests",
+      "args": {},
+      "result": {
+        "unit_id": "U-3d194eeafd",
+        "tests": [
+          {
+            "name": "power_on_selftest",
+            "subsystem": "system",
+            "description": "Boot the unit and enumerate devices on I2C, UART and CAN.",
+            "cost_s": 5.0
+          },
+          {
+            "name": "battery_rest_check",
+            "subsystem": "battery",
+            "description": "Read pack and per-cell voltages at rest.",
+            "cost_s": 5.0
+          },
+          {
+            "name": "esc_telemetry",
+            "subsystem": "esc",
+            "description": "Read ESC telemetry: sync errors, packet loss, back-EMF detection.",
+            "cost_s": 10.0
+          },
+          {
+            "name": "compass_static",
+            "subsystem": "compass",
+            "description": "Compare compass heading to the fixture reference with motors off.",
+            "cost_s": 10.0
+          },
+          {
+            "name": "harness_continuity",
+            "subsystem": "harness",
+            "description": "Measure per-bus continuity resistance and CAN termination.",
+            "cost_s": 15.0
+          },
+          {
+            "name": "camera_selftest",
+            "subsystem": "camera",
+            "description": "Run camera built-in self test and measure frame rate and CSI errors.",
+            "cost_s": 15.0
+          },
+          {
+            "name": "imu_static",
+            "subsystem": "imu",
+            "description": "Log 1000 IMU samples on the static fixture: gyro bias, accel noise, dropouts.",
+            "cost_s": 20.0
+          },
+          {
+            "name": "motor_spin_test",
+            "subsystem": "motors",
+            "description": "Spin all motors at 50 percent throttle: current, RPM, RPM jitter, temp.",
+            "cost_s": 30.0
+          },
+          {
+            "name": "compass_motor_interference",
+            "subsystem": "compass",
+            "description": "Sweep throttle 0-75 percent and log compass heading deviation.",
+            "cost_s": 40.0
+          },
+          {
+            "name": "battery_load_test",
+            "subsystem": "battery",
+            "description": "Apply a 20 A load and measure sag, cell imbalance, internal resistance.",
+            "cost_s": 60.0
+          }
+        ]
+      },
+      "test_time_s": 0.0,
+      "observation": "Station offers 10 tests.",
+      "hypotheses": []
+    },
+    {
+      "step": 2,
+      "thought": "I will run the power_on_selftest to quickly check all communication buses and initial device enumeration across all subsystems.",
+      "tool": "run_test",
+      "args": {
+        "test_name": "power_on_selftest"
+      },
+      "result": {
+        "unit_id": "U-3d194eeafd",
+        "test_name": "power_on_selftest",
+        "passed": true,
+        "cost_s": 5.0,
+        "readings": {
+          "boot_time_ms": 1821.0,
+          "can_nodes_found": 4.0,
+          "uart_devices_found": [
+            "camera_ctrl"
+          ],
+          "camera_sensor_id_read": true,
+          "i2c_devices_found": [
+            "imu",
+            "compass"
+          ],
+          "boot_ok": true
+        },
+        "unit_total_test_time_s": 5.0,
+        "failures": [],
+        "run_index": 0
+      },
+      "test_time_s": 5.0,
+      "observation": "The power_on_selftest passed successfully with all devices found on I2C, UART, and CAN, leaving the unit as a healthy candidate or requiring further tests across all subsystems to isolate any hidden faults.",
+      "hypotheses": [
+        {
+          "root_cause_code": "HEALTHY",
+          "confidence": 0.5,
+          "rationale": "Initial power on self-test passed without any errors or missing devices."
+        },
+        {
+          "root_cause_code": "UNKNOWN",
+          "confidence": 0.5,
+          "rationale": "Only the system boot test has been run; comprehensive tests on all subsystems are required to confirm health or reveal a specific fault."
+        }
+      ]
+    },
+    {
+      "step": 3,
+      "thought": "I need to check the battery health next as part of covering all subsystems to confirm the unit is healthy or find a hidden battery fault.",
+      "tool": "run_test",
+      "args": {
+        "test_name": "battery_rest_check"
+      },
+      "result": {
+        "unit_id": "U-3d194eeafd",
+        "test_name": "battery_rest_check",
+        "passed": true,
+        "cost_s": 5.0,
+        "readings": {
+          "cell_voltages_v": [
+            4.146,
+            4.146,
+            4.153,
+            4.147
+          ],
+          "pack_voltage_v": 16.593,
+          "cell_imbalance_v": 0.006
+        },
+        "unit_total_test_time_s": 10.0,
+        "failures": [],
+        "run_index": 0
+      },
+      "test_time_s": 10.0,
+      "observation": "The battery_rest_check passed successfully with normal cell voltages and minimal imbalance. Further subsystem tests are needed to cover all components before confirming the unit is healthy.",
+      "hypotheses": [
+        {
+          "root_cause_code": "HEALTHY",
+          "confidence": 0.6,
+          "rationale": "Power on self-test and battery rest check both passed without any failures or abnormal readings."
+        },
+        {
+          "root_cause_code": "UNKNOWN",
+          "confidence": 0.4,
+          "rationale": "Only system and battery subsystems have been checked; tests on esc, compass, harness, camera, imu, and motors are still required."
+        }
+      ]
+    },
+    {
+      "step": 4,
+      "thought": "I will run the esc_telemetry test to check the ESC subsystem for sync errors and communication issues as part of covering all subsystems.",
+      "tool": "run_test",
+      "args": {
+        "test_name": "esc_telemetry"
+      },
+      "result": {
+        "unit_id": "U-3d194eeafd",
+        "test_name": "esc_telemetry",
+        "passed": true,
+        "cost_s": 10.0,
+        "readings": {
+          "escs": [
+            {
+              "back_emf_detected": true,
+              "temp_c": 34.0,
+              "sync_errors": 0.0,
+              "esc": "esc_1",
+              "packet_loss_pct": 0.07
+            },
+            {
+              "back_emf_detected": true,
+              "temp_c": 34.4,
+              "sync_errors": 0.0,
+              "esc": "esc_2",
+              "packet_loss_pct": 0.06
+            },
+            {
+              "back_emf_detected": true,
+              "temp_c": 35.4,
+              "sync_errors": 0.0,
+              "esc": "esc_3",
+              "packet_loss_pct": 0.14
+            },
+            {
+              "back_emf_detected": true,
+              "temp_c": 36.8,
+              "sync_errors": 0.0,
+              "esc": "esc_4",
+              "packet_loss_pct": 0.14
+            }
+          ]
+        },
+        "unit_total_test_time_s": 20.0,
+        "failures": [],
+        "run_index": 0
+      },
+      "test_time_s": 20.0,
+      "observation": "The ESC telemetry test passed successfully for all four ESCs with no sync errors, low packet loss, and normal temperatures, ruling out ESC commutation or thermal faults.",
+      "hypotheses": [
+        {
+          "root_cause_code": "HEALTHY",
+          "confidence": 0.65,
+          "rationale": "Power-on selftest, battery rest check, and ESC telemetry all passed with normal readings."
+        },
+        {
+          "root_cause_code": "UNKNOWN",
+          "confidence": 0.35,
+          "rationale": "Remaining subsystems such as compass, harness, camera, IMU, and motors still need to be tested before confirming the unit is fully healthy."
+        }
+      ]
+    },
+    {
+      "step": 5,
+      "thought": "I need to test the compass subsystem to check for any static errors or interference before concluding the unit is healthy.",
+      "tool": "run_test",
+      "args": {
+        "test_name": "compass_static"
+      },
+      "result": {
+        "unit_id": "U-3d194eeafd",
+        "test_name": "compass_static",
+        "passed": true,
+        "cost_s": 10.0,
+        "readings": {
+          "heading_error_deg": -2.12,
+          "field_magnitude_ut": 50.24,
+          "read_errors": 0.0
+        },
+        "unit_total_test_time_s": 30.0,
+        "failures": [],
+        "run_index": 0
+      },
+      "test_time_s": 30.0,
+      "observation": "The compass_static test passed successfully with a minor heading error of -2.12 degrees and normal field magnitude, ruling out static compass distortion.",
+      "hypotheses": [
+        {
+          "root_cause_code": "HEALTHY",
+          "confidence": 0.7,
+          "rationale": "Power-on selftest, battery rest check, ESC telemetry, and static compass tests have all passed successfully."
+        },
+        {
+          "root_cause_code": "UNKNOWN",
+          "confidence": 0.3,
+          "rationale": "Remaining subsystems like harness, camera, IMU, motors, and dynamic compass interference still need testing."
+        }
+      ]
+    },
+    {
+      "step": 6,
+      "thought": "I will run the harness_continuity test to check CAN bus termination and per-bus continuity resistance as part of covering all untested subsystems.",
+      "tool": "run_test",
+      "args": {
+        "test_name": "harness_continuity"
+      },
+      "result": {
+        "unit_id": "U-3d194eeafd",
+        "test_name": "harness_continuity",
+        "passed": true,
+        "cost_s": 15.0,
+        "readings": {
+          "can_termination_ohm": 59.7,
+          "buses": {
+            "I2C": {
+              "continuity": "ok",
+              "resistance_ohm": 0.29
+            },
+            "UART": {
+              "continuity": "ok",
+              "resistance_ohm": 0.314
+            },
+            "CAN": {
+              "continuity": "ok",
+              "resistance_ohm": 0.284
+            }
+          }
+        },
+        "unit_total_test_time_s": 45.0,
+        "failures": [],
+        "run_index": 0
+      },
+      "test_time_s": 45.0,
+      "observation": "The harness_continuity test passed successfully, confirming proper bus continuity and a valid CAN bus termination resistance of 59.7 ohms.",
+      "hypotheses": [
+        {
+          "root_cause_code": "HEALTHY",
+          "confidence": 0.8,
+          "rationale": "System, battery, ESC, compass, and harness subsystems have all been tested and passed successfully."
+        },
+        {
+          "root_cause_code": "UNKNOWN",
+          "confidence": 0.2,
+          "rationale": "Remaining untested subsystems include camera, IMU, motors, and dynamic compass interference."
+        }
+      ]
+    },
+    {
+      "step": 7,
+      "thought": "I need to test the camera subsystem next to ensure it has no hidden faults before concluding the unit is healthy.",
+      "tool": "run_test",
+      "args": {
+        "test_name": "camera_selftest"
+      },
+      "result": {
+        "unit_id": "U-3d194eeafd",
+        "test_name": "camera_selftest",
+        "passed": true,
+        "cost_s": 15.0,
+        "readings": {
+          "sensor_id_ok": true,
+          "self_test_pass": true,
+          "frame_rate_fps": 30.0,
+          "csi_crc_errors": 0.0
+        },
+        "unit_total_test_time_s": 60.0,
+        "failures": [],
+        "run_index": 0
+      },
+      "test_time_s": 60.0,
+      "observation": "The camera_selftest passed successfully with a valid sensor ID, stable frame rate, and zero CSI CRC errors, confirming the camera subsystem is healthy.",
+      "hypotheses": [
+        {
+          "root_cause_code": "HEALTHY",
+          "confidence": 0.85,
+          "rationale": "System, battery, ESC, compass, harness, and camera subsystems have all been tested and passed successfully."
+        },
+        {
+          "root_cause_code": "UNKNOWN",
+          "confidence": 0.15,
+          "rationale": "Remaining untested subsystems include IMU, motors, and dynamic compass interference."
+        }
+      ]
+    },
+    {
+      "step": 8,
+      "thought": "I will run the imu_static test to check the IMU subsystem, since all other checked subsystems have passed and the IMU is untested.",
+      "tool": "run_test",
+      "args": {
+        "test_name": "imu_static"
+      },
+      "result": {
+        "unit_id": "U-3d194eeafd",
+        "test_name": "imu_static",
+        "passed": true,
+        "cost_s": 20.0,
+        "readings": {
+          "samples_dropped": 0.0,
+          "gyro_bias_dps": {
+            "x": 0.004,
+            "y": -0.047,
+            "z": 0.045
+          },
+          "samples_expected": 1000.0,
+          "accel_noise_mg": 1.74
+        },
+        "unit_total_test_time_s": 80.0,
+        "failures": [],
+        "run_index": 0
+      },
+      "test_time_s": 80.0,
+      "observation": "The imu_static test passed successfully with zero dropped samples, low gyro bias, and normal accelerometer noise, confirming the IMU subsystem is healthy.",
+      "hypotheses": [
+        {
+          "root_cause_code": "HEALTHY",
+          "confidence": 0.9,
+          "rationale": "System, battery, ESC, compass, harness, camera, and IMU subsystems have all been tested and passed successfully with no failures."
+        },
+        {
+          "root_cause_code": "UNKNOWN",
+          "confidence": 0.1,
+          "rationale": "Remaining untested subsystems include motors and dynamic compass interference under throttle."
+        }
+      ]
+    },
+    {
+      "step": 9,
+      "thought": "I need to test the motor_spin_test to cover the motor subsystem, which is the last major untested subsystem, to confirm the unit is fully healthy.",
+      "tool": "run_test",
+      "args": {
+        "test_name": "motor_spin_test"
+      },
+      "result": {
+        "unit_id": "U-3d194eeafd",
+        "test_name": "motor_spin_test",
+        "cost_s": 30.0,
+        "readings": {
+          "motors": [
+            {
+              "rpm": 9007.0,
+              "rpm_jitter": 72.0,
+              "temp_c": 53.4,
+              "current_a": 5.58,
+              "motor": "motor_1"
+            },
+            {
+              "rpm": 9483.0,
+              "rpm_jitter": 29.0,
+              "temp_c": 41.9,
+              "current_a": 4.26,
+              "motor": "motor_2"
+            },
+            {
+              "rpm": 9093.0,
+              "rpm_jitter": 19.0,
+              "temp_c": 41.3,
+              "current_a": 4.18,
+              "motor": "motor_3"
+            },
+            {
+              "rpm": 9431.0,
+              "rpm_jitter": 17.0,
+              "temp_c": 42.9,
+              "current_a": 4.21,
+              "motor": "motor_4"
+            }
+          ],
+          "throttle_pct": 50.0
+        },
+        "failures": [
+          "motor_1 current 5.58 A outside 3.4-5.0"
+        ],
+        "unit_total_test_time_s": 110.0,
+        "passed": false,
+        "run_index": 0
+      },
+      "test_time_s": 110.0,
+      "observation": "The motor_spin_test failed because motor_1 drew 5.58 A, which is outside the acceptable range of 3.4-5.0 A, while also showing elevated temperature and RPM jitter. This indicates a potential winding short or mechanical resistance in motor_1.",
+      "hypotheses": [
+        {
+          "root_cause_code": "MOTOR_WINDING_SHORT",
+          "confidence": 0.6,
+          "rationale": "Motor 1 shows abnormally high current draw (5.58 A), elevated temperature (53.4 C), and higher RPM jitter compared to the other motors, strongly pointing toward an electrical winding short or mechanical drag."
+        },
+        {
+          "root_cause_code": "MOTOR_BEARING_DEGRADED",
+          "confidence": 0.4,
+          "rationale": "Elevated current draw and higher temperature on motor_1 could also stem from mechanical friction caused by a degraded bearing."
+        }
+      ]
+    },
+    {
+      "step": 10,
+      "thought": "Since motor_1 failed the motor_spin_test due to high current and elevated temperature, let's search the failure library for similar motor current anomalies to confirm whether it is a winding short or degraded bearing.",
+      "tool": "search_failure_library",
+      "args": {
+        "query": "motor_1 current high temperature elevated rpm jitter"
+      },
+      "result": {
+        "retriever": "bm25",
+        "matches": [
+          {
+            "id": "FL-017",
+            "title": "Motor current high on two motors, propellers unbalanced",
+            "subsystem": "motors",
+            "symptom_summary": "Two motors show elevated current and rpm jitter at speed with propellers installed. With propellers removed the spin test passes.",
+            "key_tests": [
+              "motor_spin_test"
+            ],
+            "root_cause_code": "PROP_IMBALANCE",
+            "root_cause": "Out-of-balance propellers from a bad molding batch.",
+            "rework_action": null,
+            "rework_notes": "Swap propellers. The station spin test runs without propellers, so this should not appear there.",
+            "occurrences": 9,
+            "score": 16.2625
+          },
+          {
+            "id": "FL-015",
+            "title": "Motor current high after propeller strike",
+            "subsystem": "motors",
+            "symptom_summary": "One motor draws high current and runs hot after a drop at the previous station; rpm slightly low. Visible bent shaft.",
+            "key_tests": [
+              "motor_spin_test"
+            ],
+            "root_cause_code": "MOTOR_BEARING_DEGRADED",
+            "root_cause": "Bearing damaged by impact load.",
+            "rework_action": "replace_motor",
+            "rework_notes": "Historical variant of FL-002 caused by handling damage.",
+            "occurrences": 7,
+            "score": 11.6613
+          },
+          {
+            "id": "FL-002",
+            "title": "Motor runs warm and draws extra current at normal speed",
+            "subsystem": "motors",
+            "symptom_summary": "One motor draws roughly 30 percent more current than the others at 50 percent throttle while rpm stays within spec. Temperature a bit higher than peers but under the limit. Slight increase in rpm jitter. Gritty feel when spun by hand.",
+            "key_tests": [
+              "motor_spin_test"
+            ],
+            "root_cause_code": "MOTOR_BEARING_DEGRADED",
+            "root_cause": "Worn or contaminated motor bearing adding mechanical drag.",
+            "rework_action": "replace_motor",
+            "rework_notes": "Replace the motor. Rpm in spec separates this from a winding short.",
+            "occurrences": 63,
+            "score": 10.0273
+          }
+        ]
+      },
+      "test_time_s": 110.0,
+      "observation": "The motor_spin_test failed due to high current draw (5.58 A), elevated temperature (53.4 C), and increased RPM jitter on motor_1. This specifically points to a motor-level defect such as a winding short or a degraded bearing.",
+      "hypotheses": [
+        {
+          "root_cause_code": "MOTOR_WINDING_SHORT",
+          "confidence": 0.6,
+          "rationale": "Motor 1 exhibits high current draw and elevated temperature and jitter, which are classic signs of a partial winding short."
+        },
+        {
+          "root_cause_code": "MOTOR_BEARING_DEGRADED",
+          "confidence": 0.4,
+          "rationale": "Mechanical drag from a degraded bearing on motor_1 can also produce elevated current draw and higher temperatures."
+        }
+      ]
+    },
+    {
+      "step": 11,
+      "thought": "Proposing rework to replace motor 1 based on the elevated current draw, high temperature, and RPM jitter observed in the motor spin test.",
+      "tool": "propose_rework",
+      "args": {
+        "action": "replace_motor",
+        "target": "motor_1"
+      },
+      "result": {
+        "unit_id": "U-3d194eeafd",
+        "action": "replace_motor",
+        "target": "motor_1",
+        "suite_passed": true,
+        "cost_s": 300.0,
+        "failing_tests": [],
+        "applied": true
+      },
+      "test_time_s": 110.0,
+      "observation": "Rework applied; full suite passed: True.",
+      "hypotheses": [
+        {
+          "root_cause_code": "MOTOR_WINDING_SHORT",
+          "confidence": 0.6,
+          "rationale": "Motor 1 exhibits high current draw and elevated temperature and jitter, which are classic signs of a partial winding short."
+        },
+        {
+          "root_cause_code": "MOTOR_BEARING_DEGRADED",
+          "confidence": 0.4,
+          "rationale": "Mechanical drag from a degraded bearing on motor_1 can also produce elevated current draw and higher temperatures."
+        }
+      ]
+    }
+  ],
+  "mode": "library",
+  "scenario_index": 24,
+  "ground_truth": {
+    "fault_id": "MOTOR_BEARING_DEGRADED",
+    "unit_seed": 196997,
+    "target": "motor_1",
+    "rework_action": "replace_motor"
+  },
+  "score": {
+    "predicted": "MOTOR_BEARING_DEGRADED",
+    "correct": true,
+    "rework_fixed_unit": true
+  }
+}
