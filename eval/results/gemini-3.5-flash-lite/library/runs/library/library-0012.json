@@ -1,0 +1,553 @@
+{
+  "run_id": "library-0012",
+  "unit_id": "U-19594bcbc6",
+  "agent": {
+    "model": "gemini-3.5-flash-lite",
+    "config": {
+      "max_steps": 12,
+      "time_budget_s": 180.0,
+      "use_library": true,
+      "retriever": "bm25",
+      "top_k": 3
+    }
+  },
+  "started_at": "2026-10-19T18:17:09.674338+00:00",
+  "duration_s": 281.794,
+  "stop_reason": "proposed",
+  "final": {
+    "root_cause": "CAMERA_RIBBON_FAULT",
+    "confidence": 0.95,
+    "recommended_rework": {
+      "action": "reseat_camera_ribbon",
+      "target": null
+    },
+    "evidence": [
+      {
+        "step": 6,
+        "test_name": "camera_selftest",
+        "run_index": 0,
+        "passed": false,
+        "failures": [
+          "frame rate 24.0 fps < 28",
+          "98 CSI CRC errors (limit 5)"
+        ],
+        "readings": {
+          "sensor_id_ok": true,
+          "self_test_pass": false,
+          "frame_rate_fps": 24.0,
+          "csi_crc_errors": 98.0
+        }
+      },
+      {
+        "step": 2,
+        "test_name": "power_on_selftest",
+        "run_index": 0,
+        "passed": true,
+        "failures": [],
+        "readings": {
+          "boot_time_ms": 1849.0,
+          "can_nodes_found": 4.0,
+          "uart_devices_found": [
+            "camera_ctrl"
+          ],
+          "camera_sensor_id_read": true,
+          "i2c_devices_found": [
+            "imu",
+            "compass"
+          ],
+          "boot_ok": true
+        }
+      }
+    ]
+  },
+  "rework_result": {
+    "unit_id": "U-19594bcbc6",
+    "action": "reseat_camera_ribbon",
+    "suite_passed": true,
+    "cost_s": 300.0,
+    "target": "",
+    "failing_tests": [],
+    "applied": true
+  },
+  "totals": {
+    "tool_calls": 9,
+    "tests_run": 6,
+    "test_time_s": 60.0,
+    "llm_calls": 16,
+    "input_tokens": 37897,
+    "output_tokens": 2094
+  },
+  "errors": [],
+  "steps": [
+    {
+      "step": 1,
+      "thought": "I will list all available tests on the manufacturing line to determine which tests can check the subsystems.",
+      "tool": "list_tests",
+      "args": {},
+      "result": {
+        "unit_id": "U-19594bcbc6",
+        "tests": [
+          {
+            "name": "power_on_selftest",
+            "subsystem": "system",
+            "description": "Boot the unit and enumerate devices on I2C, UART and CAN.",
+            "cost_s": 5.0
+          },
+          {
+            "name": "battery_rest_check",
+            "subsystem": "battery",
+            "description": "Read pack and per-cell voltages at rest.",
+            "cost_s": 5.0
+          },
+          {
+            "name": "esc_telemetry",
+            "subsystem": "esc",
+            "description": "Read ESC telemetry: sync errors, packet loss, back-EMF detection.",
+            "cost_s": 10.0
+          },
+          {
+            "name": "compass_static",
+            "subsystem": "compass",
+            "description": "Compare compass heading to the fixture reference with motors off.",
+            "cost_s": 10.0
+          },
+          {
+            "name": "harness_continuity",
+            "subsystem": "harness",
+            "description": "Measure per-bus continuity resistance and CAN termination.",
+            "cost_s": 15.0
+          },
+          {
+            "name": "camera_selftest",
+            "subsystem": "camera",
+            "description": "Run camera built-in self test and measure frame rate and CSI errors.",
+            "cost_s": 15.0
+          },
+          {
+            "name": "imu_static",
+            "subsystem": "imu",
+            "description": "Log 1000 IMU samples on the static fixture: gyro bias, accel noise, dropouts.",
+            "cost_s": 20.0
+          },
+          {
+            "name": "motor_spin_test",
+            "subsystem": "motors",
+            "description": "Spin all motors at 50 percent throttle: current, RPM, RPM jitter, temp.",
+            "cost_s": 30.0
+          },
+          {
+            "name": "compass_motor_interference",
+            "subsystem": "compass",
+            "description": "Sweep throttle 0-75 percent and log compass heading deviation.",
+            "cost_s": 40.0
+          },
+          {
+            "name": "battery_load_test",
+            "subsystem": "battery",
+            "description": "Apply a 20 A load and measure sag, cell imbalance, internal resistance.",
+            "cost_s": 60.0
+          }
+        ]
+      },
+      "test_time_s": 0.0,
+      "observation": "Station offers 10 tests.",
+      "hypotheses": []
+    },
+    {
+      "step": 2,
+      "thought": "I will run power_on_selftest as the cheapest initial test to verify basic hardware enumeration across I2C, UART, and CAN.",
+      "tool": "run_test",
+      "args": {
+        "test_name": "power_on_selftest"
+      },
+      "result": {
+        "unit_id": "U-19594bcbc6",
+        "test_name": "power_on_selftest",
+        "passed": true,
+        "cost_s": 5.0,
+        "readings": {
+          "boot_time_ms": 1849.0,
+          "can_nodes_found": 4.0,
+          "uart_devices_found": [
+            "camera_ctrl"
+          ],
+          "camera_sensor_id_read": true,
+          "i2c_devices_found": [
+            "imu",
+            "compass"
+          ],
+          "boot_ok": true
+        },
+        "unit_total_test_time_s": 5.0,
+        "failures": [],
+        "run_index": 0
+      },
+      "test_time_s": 5.0,
+      "observation": "The initial power_on_selftest passed successfully with all expected I2C, UART, and CAN devices enumerated correctly. This rules out major power-on and bus enumeration failures, but all other subsystems still need testing to confirm a healthy unit or isolate any latent faults.",
+      "hypotheses": [
+        {
+          "root_cause_code": "HEALTHY",
+          "confidence": 0.3,
+          "rationale": "Initial power-on self test passed with no errors, suggesting the unit could be healthy."
+        },
+        {
+          "root_cause_code": "UNKNOWN",
+          "confidence": 0.1,
+          "rationale": "Insufficient tests run to rule out subsystem-specific degradation or intermittent faults."
+        }
+      ]
+    },
+    {
+      "step": 3,
+      "thought": "I will run battery_rest_check to verify battery cell voltages and rest state as the next cheap diagnostic step.",
+      "tool": "run_test",
+      "args": {
+        "test_name": "battery_rest_check"
+      },
+      "result": {
+        "unit_id": "U-19594bcbc6",
+        "test_name": "battery_rest_check",
+        "passed": true,
+        "cost_s": 5.0,
+        "readings": {
+          "cell_voltages_v": [
+            4.148,
+            4.147,
+            4.154,
+            4.147
+          ],
+          "pack_voltage_v": 16.596,
+          "cell_imbalance_v": 0.007
+        },
+        "unit_total_test_time_s": 10.0,
+        "failures": [],
+        "run_index": 0
+      },
+      "test_time_s": 10.0,
+      "observation": "The battery rest check passed with balanced cell voltages and proper pack voltage, ruling out battery rest-state anomalies. Further subsystem tests are required to cover all remaining components.",
+      "hypotheses": [
+        {
+          "root_cause_code": "HEALTHY",
+          "confidence": 0.4,
+          "rationale": "Both power_on_selftest and battery_rest_check passed with normal readings, increasing the likelihood that the unit is healthy."
+        },
+        {
+          "root_cause_code": "UNKNOWN",
+          "confidence": 0.1,
+          "rationale": "Remaining subsystems such as esc, motor, compass, imu, camera, and harness still need to be tested before a definitive diagnosis can be made."
+        }
+      ]
+    },
+    {
+      "step": 4,
+      "thought": "Run esc_telemetry to check ESC telemetry and sync status, continuing our systematic coverage of all subsystems.",
+      "tool": "run_test",
+      "args": {
+        "test_name": "esc_telemetry"
+      },
+      "result": {
+        "unit_id": "U-19594bcbc6",
+        "test_name": "esc_telemetry",
+        "passed": true,
+        "cost_s": 10.0,
+        "readings": {
+          "escs": [
+            {
+              "back_emf_detected": true,
+              "temp_c": 34.8,
+              "sync_errors": 0.0,
+              "esc": "esc_1",
+              "packet_loss_pct": 0.03
+            },
+            {
+              "back_emf_detected": true,
+              "temp_c": 36.3,
+              "sync_errors": 1.0,
+              "esc": "esc_2",
+              "packet_loss_pct": 0.08
+            },
+            {
+              "back_emf_detected": true,
+              "temp_c": 35.1,
+              "sync_errors": 0.0,
+              "esc": "esc_3",
+              "packet_loss_pct": 0.01
+            },
+            {
+              "back_emf_detected": true,
+              "temp_c": 34.8,
+              "sync_errors": 0.0,
+              "esc": "esc_4",
+              "packet_loss_pct": 0.03
+            }
+          ]
+        },
+        "unit_total_test_time_s": 20.0,
+        "failures": [],
+        "run_index": 0
+      },
+      "test_time_s": 20.0,
+      "observation": "The ESC telemetry test passed with minimal packet loss, normal temperatures, and no significant sync errors across all ESCs, ruling out major ESC communication or commutation failures.",
+      "hypotheses": [
+        {
+          "root_cause_code": "HEALTHY",
+          "confidence": 0.5,
+          "rationale": "Power-on, battery rest, and ESC telemetry tests have all passed cleanly, indicating the unit is likely healthy so far."
+        },
+        {
+          "root_cause_code": "UNKNOWN",
+          "confidence": 0.5,
+          "rationale": "Remaining subsystems including compass, imu, camera, motors, and harness still need testing to ensure no latent faults exist."
+        }
+      ]
+    },
+    {
+      "step": 5,
+      "thought": "I will run the compass_static test to check the compass subsystem for any static offset or heading errors before moving on to other unverified subsystems.",
+      "tool": "run_test",
+      "args": {
+        "test_name": "compass_static"
+      },
+      "result": {
+        "unit_id": "U-19594bcbc6",
+        "test_name": "compass_static",
+        "passed": true,
+        "cost_s": 10.0,
+        "readings": {
+          "heading_error_deg": -0.14,
+          "field_magnitude_ut": 49.51,
+          "read_errors": 0.0
+        },
+        "unit_total_test_time_s": 30.0,
+        "failures": [],
+        "run_index": 0
+      },
+      "test_time_s": 30.0,
+      "observation": "The static compass test passed with minimal heading error and correct field magnitude, ruling out static compass distortion.",
+      "hypotheses": [
+        {
+          "root_cause_code": "HEALTHY",
+          "confidence": 0.6,
+          "rationale": "Power-on selftest, battery rest check, ESC telemetry, and static compass tests have all passed cleanly, showing no faults in those subsystems."
+        },
+        {
+          "root_cause_code": "UNKNOWN",
+          "confidence": 0.4,
+          "rationale": "Remaining subsystems like IMU, camera, motors, harness, and load performance still require testing before a final healthy verdict can be reached."
+        }
+      ]
+    },
+    {
+      "step": 6,
+      "thought": "I will run the camera_selftest to check the camera subsystem, as it is one of the remaining untested subsystems needed to verify unit health.",
+      "tool": "run_test",
+      "args": {
+        "test_name": "camera_selftest"
+      },
+      "result": {
+        "unit_id": "U-19594bcbc6",
+        "test_name": "camera_selftest",
+        "cost_s": 15.0,
+        "readings": {
+          "sensor_id_ok": true,
+          "self_test_pass": false,
+          "frame_rate_fps": 24.0,
+          "csi_crc_errors": 98.0
+        },
+        "failures": [
+          "frame rate 24.0 fps < 28",
+          "98 CSI CRC errors (limit 5)"
+        ],
+        "unit_total_test_time_s": 45.0,
+        "passed": false,
+        "run_index": 0
+      },
+      "test_time_s": 45.0,
+      "observation": "The camera selftest failed with 98 CSI CRC errors and a low frame rate of 24.0 fps, pointing to a camera ribbon cable fault or camera module issue.",
+      "hypotheses": [
+        {
+          "root_cause_code": "CAMERA_RIBBON_FAULT",
+          "confidence": 0.7,
+          "rationale": "High CSI CRC errors and low frame rate during camera selftest strongly indicate a compromised CSI ribbon cable."
+        },
+        {
+          "root_cause_code": "CAMERA_SENSOR_DEAD",
+          "confidence": 0.2,
+          "rationale": "Camera is failing selftest with communication/data errors, which could stem from the sensor module itself although sensor ID was OK."
+        },
+        {
+          "root_cause_code": "UNKNOWN",
+          "confidence": 0.1,
+          "rationale": "Other subsystems have not been fully tested yet."
+        }
+      ]
+    },
+    {
+      "step": 7,
+      "thought": "I will run the harness continuity test to check all bus wiring and connectors, as it is a cheap and comprehensive next step to confirm if there are any harness-related issues associated with the camera failure.",
+      "tool": "run_test",
+      "args": {
+        "test_name": "harness_continuity"
+      },
+      "result": {
+        "unit_id": "U-19594bcbc6",
+        "test_name": "harness_continuity",
+        "passed": true,
+        "cost_s": 15.0,
+        "readings": {
+          "can_termination_ohm": 57.8,
+          "buses": {
+            "I2C": {
+              "continuity": "ok",
+              "resistance_ohm": 0.293
+            },
+            "UART": {
+              "continuity": "ok",
+              "resistance_ohm": 0.255
+            },
+            "CAN": {
+              "continuity": "ok",
+              "resistance_ohm": 0.18
+            }
+          }
+        },
+        "unit_total_test_time_s": 60.0,
+        "failures": [],
+        "run_index": 0
+      },
+      "test_time_s": 60.0,
+      "observation": "The harness continuity test passed successfully with normal resistance and CAN termination values, ruling out wiring harness issues. Combined with the previous camera selftest failure, the fault is isolated to the camera subsystem.",
+      "hypotheses": [
+        {
+          "root_cause_code": "CAMERA_RIBBON_FAULT",
+          "confidence": 0.8,
+          "rationale": "High CSI CRC errors and low frame rate during camera selftest with a functional sensor ID strongly point to a degraded or poorly seated camera ribbon cable."
+        },
+        {
+          "root_cause_code": "CAMERA_SENSOR_DEAD",
+          "confidence": 0.2,
+          "rationale": "While sensor ID was read successfully during boot, internal data corruption or sensor failure could still cause frame rate drops and CRC errors."
+        }
+      ]
+    },
+    {
+      "step": 8,
+      "thought": "To distinguish between a camera ribbon cable fault and a dead or failing camera sensor, I will search the failure library for similar CSI CRC error patterns.",
+      "tool": "search_failure_library",
+      "args": {
+        "query": "CSI CRC errors camera frame rate drop"
+      },
+      "result": {
+        "retriever": "bm25",
+        "matches": [
+          {
+            "id": "FL-011",
+            "title": "Camera self-test fails with CSI CRC errors",
+            "subsystem": "camera",
+            "symptom_summary": "Camera sensor ID reads correctly but self test fails. Frame rate below 28 fps and many CSI CRC errors on the data lanes.",
+            "key_tests": [
+              "camera_selftest",
+              "power_on_selftest"
+            ],
+            "root_cause_code": "CAMERA_RIBBON_FAULT",
+            "root_cause": "CSI ribbon cable creased or partially inserted in the connector.",
+            "rework_action": "reseat_camera_ribbon",
+            "rework_notes": "Reseat the ribbon; replace it if creased.",
+            "occurrences": 38,
+            "score": 28.1118
+          },
+          {
+            "id": "FL-020",
+            "title": "Camera frame rate low, no CRC errors",
+            "subsystem": "camera",
+            "symptom_summary": "Camera self test reports frame rate around 15 fps with zero CRC errors and sensor ID OK. Camera firmware version string does not match the release.",
+            "key_tests": [
+              "camera_selftest"
+            ],
+            "root_cause_code": "CAMERA_FIRMWARE_MISMATCH",
+            "root_cause": "Camera module shipped with old firmware set to a low frame rate mode.",
+            "rework_action": null,
+            "rework_notes": "Update camera firmware. Zero CRC errors separates it from a ribbon fault.",
+            "occurrences": 10,
+            "score": 25.1722
+          },
+          {
+            "id": "FL-012",
+            "title": "Camera not detected, no frames",
+            "subsystem": "camera",
+            "symptom_summary": "Power-on self test cannot read the camera sensor ID. Camera self test fails with zero fps and zero CRC errors, meaning no data arrives at all.",
+            "key_tests": [
+              "power_on_selftest",
+              "camera_selftest"
+            ],
+            "root_cause_code": "CAMERA_SENSOR_DEAD",
+            "root_cause": "Dead image sensor on the camera module.",
+            "rework_action": "replace_camera_module",
+            "rework_notes": "Replace the camera module.",
+            "occurrences": 11,
+            "score": 10.3939
+          }
+        ]
+      },
+      "test_time_s": 60.0,
+      "observation": "The historical search confirms that high CSI CRC errors and low frame rates with a valid sensor ID are characteristic of CAMERA_RIBBON_FAULT rather than a dead sensor or firmware mismatch.",
+      "hypotheses": [
+        {
+          "root_cause_code": "CAMERA_RIBBON_FAULT",
+          "confidence": 0.95,
+          "rationale": "Camera selftest failed with 98 CSI CRC errors and 24 fps while sensor ID and boot checks passed. Historical records (FL-011) match these exact symptoms to a camera ribbon cable fault."
+        },
+        {
+          "root_cause_code": "CAMERA_SENSOR_DEAD",
+          "confidence": 0.05,
+          "rationale": "Unlikely since camera sensor ID and power-on checks passed successfully, but retained as a low-probability alternative."
+        }
+      ]
+    },
+    {
+      "step": 9,
+      "thought": "The camera subsystem is clearly at fault with excessive CSI CRC errors and low frame rate, matching historical record FL-011 for a camera ribbon fault. I will now propose the rework action to reseat the camera ribbon.",
+      "tool": "propose_rework",
+      "args": {
+        "action": "reseat_camera_ribbon",
+        "target": null
+      },
+      "result": {
+        "unit_id": "U-19594bcbc6",
+        "action": "reseat_camera_ribbon",
+        "suite_passed": true,
+        "cost_s": 300.0,
+        "target": "",
+        "failing_tests": [],
+        "applied": true
+      },
+      "test_time_s": 60.0,
+      "observation": "Rework applied; full suite passed: True.",
+      "hypotheses": [
+        {
+          "root_cause_code": "CAMERA_RIBBON_FAULT",
+          "confidence": 0.95,
+          "rationale": "Camera selftest failed with 98 CSI CRC errors and 24 fps while sensor ID and boot checks passed. Historical records (FL-011) match these exact symptoms to a camera ribbon cable fault."
+        },
+        {
+          "root_cause_code": "CAMERA_SENSOR_DEAD",
+          "confidence": 0.05,
+          "rationale": "Unlikely since camera sensor ID and power-on checks passed successfully, but retained as a low-probability alternative."
+        }
+      ]
+    }
+  ],
+  "mode": "library",
+  "scenario_index": 12,
+  "ground_truth": {
+    "fault_id": "CAMERA_RIBBON_FAULT",
+    "unit_seed": 566950,
+    "target": null,
+    "rework_action": "reseat_camera_ribbon"
+  },
+  "score": {
+    "predicted": "CAMERA_RIBBON_FAULT",
+    "correct": true,
+    "rework_fixed_unit": true
+  }
+}

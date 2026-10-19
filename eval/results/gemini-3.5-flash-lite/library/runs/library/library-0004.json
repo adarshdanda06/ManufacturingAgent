@@ -1,0 +1,306 @@
+{
+  "run_id": "library-0004",
+  "unit_id": "U-733f306b8f",
+  "agent": {
+    "model": "gemini-3.5-flash-lite",
+    "config": {
+      "max_steps": 12,
+      "time_budget_s": 180.0,
+      "use_library": true,
+      "retriever": "bm25",
+      "top_k": 3
+    }
+  },
+  "started_at": "2026-10-19T18:04:04.612513+00:00",
+  "duration_s": 105.035,
+  "stop_reason": "proposed",
+  "final": {
+    "root_cause": "I2C_CONNECTOR_LOOSE",
+    "confidence": 0.95,
+    "recommended_rework": {
+      "action": "reseat_i2c_connector",
+      "target": null
+    },
+    "evidence": [
+      {
+        "step": 2,
+        "test_name": "power_on_selftest",
+        "run_index": 0,
+        "passed": false,
+        "failures": [
+          "I2C device 'imu' not found",
+          "I2C device 'compass' not found"
+        ],
+        "readings": {
+          "boot_time_ms": 1877.0,
+          "can_nodes_found": 4.0,
+          "uart_devices_found": [
+            "camera_ctrl"
+          ],
+          "camera_sensor_id_read": true,
+          "i2c_devices_found": [],
+          "boot_ok": true
+        }
+      },
+      {
+        "step": 3,
+        "test_name": "harness_continuity",
+        "run_index": 0,
+        "passed": false,
+        "failures": [
+          "I2C continuity intermittent, 3.54 ohm (limit 1.0)"
+        ],
+        "readings": {
+          "can_termination_ohm": 59.4,
+          "buses": {
+            "I2C": {
+              "continuity": "intermittent",
+              "resistance_ohm": 3.54
+            },
+            "UART": {
+              "continuity": "ok",
+              "resistance_ohm": 0.24
+            },
+            "CAN": {
+              "continuity": "ok",
+              "resistance_ohm": 0.245
+            }
+          }
+        }
+      }
+    ]
+  },
+  "rework_result": {
+    "unit_id": "U-733f306b8f",
+    "action": "reseat_i2c_connector",
+    "suite_passed": true,
+    "cost_s": 300.0,
+    "target": "",
+    "failing_tests": [],
+    "applied": true
+  },
+  "totals": {
+    "tool_calls": 4,
+    "tests_run": 2,
+    "test_time_s": 20.0,
+    "llm_calls": 6,
+    "input_tokens": 10552,
+    "output_tokens": 5961
+  },
+  "errors": [],
+  "steps": [
+    {
+      "step": 1,
+      "thought": "I will list all available tests on the station to understand what diagnostic tools and their corresponding costs we have for this drone.",
+      "tool": "list_tests",
+      "args": {},
+      "result": {
+        "unit_id": "U-733f306b8f",
+        "tests": [
+          {
+            "name": "power_on_selftest",
+            "subsystem": "system",
+            "description": "Boot the unit and enumerate devices on I2C, UART and CAN.",
+            "cost_s": 5.0
+          },
+          {
+            "name": "battery_rest_check",
+            "subsystem": "battery",
+            "description": "Read pack and per-cell voltages at rest.",
+            "cost_s": 5.0
+          },
+          {
+            "name": "esc_telemetry",
+            "subsystem": "esc",
+            "description": "Read ESC telemetry: sync errors, packet loss, back-EMF detection.",
+            "cost_s": 10.0
+          },
+          {
+            "name": "compass_static",
+            "subsystem": "compass",
+            "description": "Compare compass heading to the fixture reference with motors off.",
+            "cost_s": 10.0
+          },
+          {
+            "name": "harness_continuity",
+            "subsystem": "harness",
+            "description": "Measure per-bus continuity resistance and CAN termination.",
+            "cost_s": 15.0
+          },
+          {
+            "name": "camera_selftest",
+            "subsystem": "camera",
+            "description": "Run camera built-in self test and measure frame rate and CSI errors.",
+            "cost_s": 15.0
+          },
+          {
+            "name": "imu_static",
+            "subsystem": "imu",
+            "description": "Log 1000 IMU samples on the static fixture: gyro bias, accel noise, dropouts.",
+            "cost_s": 20.0
+          },
+          {
+            "name": "motor_spin_test",
+            "subsystem": "motors",
+            "description": "Spin all motors at 50 percent throttle: current, RPM, RPM jitter, temp.",
+            "cost_s": 30.0
+          },
+          {
+            "name": "compass_motor_interference",
+            "subsystem": "compass",
+            "description": "Sweep throttle 0-75 percent and log compass heading deviation.",
+            "cost_s": 40.0
+          },
+          {
+            "name": "battery_load_test",
+            "subsystem": "battery",
+            "description": "Apply a 20 A load and measure sag, cell imbalance, internal resistance.",
+            "cost_s": 60.0
+          }
+        ]
+      },
+      "test_time_s": 0.0,
+      "observation": "Station offers 10 tests.",
+      "hypotheses": []
+    },
+    {
+      "step": 2,
+      "thought": "I will run the power_on_selftest to quickly check all communication buses and initial device enumeration across all subsystems.",
+      "tool": "run_test",
+      "args": {
+        "test_name": "power_on_selftest"
+      },
+      "result": {
+        "unit_id": "U-733f306b8f",
+        "test_name": "power_on_selftest",
+        "cost_s": 5.0,
+        "readings": {
+          "boot_time_ms": 1877.0,
+          "can_nodes_found": 4.0,
+          "uart_devices_found": [
+            "camera_ctrl"
+          ],
+          "camera_sensor_id_read": true,
+          "i2c_devices_found": [],
+          "boot_ok": true
+        },
+        "failures": [
+          "I2C device 'imu' not found",
+          "I2C device 'compass' not found"
+        ],
+        "unit_total_test_time_s": 5.0,
+        "passed": false,
+        "run_index": 0
+      },
+      "test_time_s": 5.0,
+      "observation": "The power_on_selftest failed because I2C devices 'imu' and 'compass' were not found, and no I2C devices were found at all, pointing to an I2C communication or connection fault.",
+      "hypotheses": [
+        {
+          "root_cause_code": "I2C_CONNECTOR_LOOSE",
+          "confidence": 0.9,
+          "rationale": "Missing I2C devices during boot strongly suggests a loose or disconnected I2C connector."
+        },
+        {
+          "root_cause_code": "UNKNOWN",
+          "confidence": 0.1,
+          "rationale": "Could be a broader power or bus failure affecting the I2C line, though connector is most likely."
+        }
+      ]
+    },
+    {
+      "step": 3,
+      "thought": "I will run harness_continuity to check the wiring and continuity of the I2C bus harness and determine if there is a break or loose connection.",
+      "tool": "run_test",
+      "args": {
+        "test_name": "harness_continuity"
+      },
+      "result": {
+        "unit_id": "U-733f306b8f",
+        "test_name": "harness_continuity",
+        "cost_s": 15.0,
+        "readings": {
+          "can_termination_ohm": 59.4,
+          "buses": {
+            "I2C": {
+              "continuity": "intermittent",
+              "resistance_ohm": 3.54
+            },
+            "UART": {
+              "continuity": "ok",
+              "resistance_ohm": 0.24
+            },
+            "CAN": {
+              "continuity": "ok",
+              "resistance_ohm": 0.245
+            }
+          }
+        },
+        "failures": [
+          "I2C continuity intermittent, 3.54 ohm (limit 1.0)"
+        ],
+        "unit_total_test_time_s": 20.0,
+        "passed": false,
+        "run_index": 0
+      },
+      "test_time_s": 20.0,
+      "observation": "The harness continuity test confirms an intermittent I2C connection with 3.54 ohms resistance, while power_on_selftest failed to find both the IMU and compass on the I2C bus. This strongly points to a loose or compromised I2C connector.",
+      "hypotheses": [
+        {
+          "root_cause_code": "I2C_CONNECTOR_LOOSE",
+          "confidence": 0.95,
+          "rationale": "Missing I2C devices during boot combined with intermittent I2C bus continuity and elevated resistance directly isolates the failure to the I2C connector or its harness."
+        },
+        {
+          "root_cause_code": "UNKNOWN",
+          "confidence": 0.05,
+          "rationale": "A localized PCB trace fracture or sensor power rail failure on the I2C bus is possible, but less likely than a loose connector."
+        }
+      ]
+    },
+    {
+      "step": 4,
+      "thought": "The I2C connector is loose, causing both the IMU and compass to disappear from the bus intermittently or completely. I will now propose the rework to reseat the I2C connector.",
+      "tool": "propose_rework",
+      "args": {
+        "action": "reseat_i2c_connector",
+        "target": null
+      },
+      "result": {
+        "unit_id": "U-733f306b8f",
+        "action": "reseat_i2c_connector",
+        "suite_passed": true,
+        "cost_s": 300.0,
+        "target": "",
+        "failing_tests": [],
+        "applied": true
+      },
+      "test_time_s": 20.0,
+      "observation": "Rework applied; full suite passed: True.",
+      "hypotheses": [
+        {
+          "root_cause_code": "I2C_CONNECTOR_LOOSE",
+          "confidence": 0.95,
+          "rationale": "Missing I2C devices during boot combined with intermittent I2C bus continuity and elevated resistance directly isolates the failure to the I2C connector or its harness."
+        },
+        {
+          "root_cause_code": "UNKNOWN",
+          "confidence": 0.05,
+          "rationale": "A localized PCB trace fracture or sensor power rail failure on the I2C bus is possible, but less likely than a loose connector."
+        }
+      ]
+    }
+  ],
+  "mode": "library",
+  "scenario_index": 4,
+  "ground_truth": {
+    "fault_id": "I2C_CONNECTOR_LOOSE",
+    "unit_seed": 231821,
+    "target": null,
+    "rework_action": "reseat_i2c_connector"
+  },
+  "score": {
+    "predicted": "I2C_CONNECTOR_LOOSE",
+    "correct": true,
+    "rework_fixed_unit": true
+  }
+}

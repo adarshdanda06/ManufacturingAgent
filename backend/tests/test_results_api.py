@@ -23,6 +23,8 @@ def results_dir(tmp_path_factory: pytest.TempPathFactory) -> Path:
         trace.pop(k)
     trace["run_id"] = "cli-run"
     (root / "runs" / "cli-run.json").write_text(json.dumps(trace))
+    nested = ["--n", "2", "--llm", "mock", "--modes", "library", "--out", str(root / "gemini-x" / "library")]
+    assert run_eval.main(nested) == 0
     (root / "broken").mkdir()
     (root / "broken" / "results.json").write_text("{not json")
     return root
@@ -35,8 +37,8 @@ def client(results_dir: Path, tmp_path: Path) -> FlaskClient:
 
 def test_list_evals(client: FlaskClient) -> None:
     rows = client.get("/api/evals").get_json()["evals"]
-    assert [r["name"] for r in rows] == ["mock-eval"]
-    row = rows[0]
+    assert sorted(r["name"] for r in rows) == ["gemini-x/library", "mock-eval"]
+    row = next(r for r in rows if r["name"] == "mock-eval")
     assert row["is_mock"] is True
     assert set(row["modes"]) == {"library", "no_library"}
     assert row["modes"]["library"]["n"] == 3
@@ -85,3 +87,12 @@ def test_serves_built_viewer(results_dir: Path, tmp_path: Path) -> None:
     assert b"console" in c.get("/assets/app.js").data
     assert c.get("/api/unknown").status_code == 404
     assert c.get("/api/evals").status_code == 200
+
+
+def test_nested_eval_name(client: FlaskClient) -> None:
+    report = client.get("/api/evals/gemini-x/library").get_json()
+    ref = report["runs"][0]
+    trace = client.get(f"/api/evals/gemini-x/library/runs/{ref['mode']}/{ref['run_id']}").get_json()
+    assert trace["run_id"] == ref["run_id"]
+    assert client.get("/api/evals/gemini-x").status_code == 404
+    assert client.get("/api/evals/gemini-x/../mock-eval").status_code == 404
