@@ -1,0 +1,91 @@
+{
+  "n_queries_per_style": 700,
+  "seeds_per_fault": 50,
+  "results": {
+    "failures": {
+      "bm25": {
+        "top1": 0.56,
+        "top3": 0.9286,
+        "per_fault_top1": {
+          "BATTERY_HIGH_IR": 0.0,
+          "BATTERY_WEAK_CELL": 1.0,
+          "CAMERA_RIBBON_FAULT": 1.0,
+          "CAMERA_SENSOR_DEAD": 0.0,
+          "CAN_TERMINATION_MISSING": 0.3,
+          "COMPASS_HARD_IRON": 0.0,
+          "COMPASS_INTERFERENCE": 1.0,
+          "ESC_DESYNC": 0.0,
+          "I2C_CONNECTOR_LOOSE": 0.56,
+          "IMU_GYRO_MISCAL": 1.0,
+          "IMU_SENSOR_FAULT": 0.98,
+          "MOTOR_BEARING_DEGRADED": 0.0,
+          "MOTOR_DEAD": 1.0,
+          "MOTOR_WINDING_SHORT": 1.0
+        }
+      },
+      "tfidf": {
+        "top1": 0.5414,
+        "top3": 0.9286,
+        "per_fault_top1": {
+          "BATTERY_HIGH_IR": 0.0,
+          "BATTERY_WEAK_CELL": 1.0,
+          "CAMERA_RIBBON_FAULT": 1.0,
+          "CAMERA_SENSOR_DEAD": 0.0,
+          "CAN_TERMINATION_MISSING": 0.0,
+          "COMPASS_HARD_IRON": 0.0,
+          "COMPASS_INTERFERENCE": 1.0,
+          "ESC_DESYNC": 0.0,
+          "I2C_CONNECTOR_LOOSE": 0.6,
+          "IMU_GYRO_MISCAL": 1.0,
+          "IMU_SENSOR_FAULT": 0.98,
+          "MOTOR_BEARING_DEGRADED": 0.0,
+          "MOTOR_DEAD": 1.0,
+          "MOTOR_WINDING_SHORT": 1.0
+        }
+      }
+    },
+    "full_dump": {
+      "bm25": {
+        "top1": 0.5,
+        "top3": 0.7143,
+        "per_fault_top1": {
+          "BATTERY_HIGH_IR": 0.0,
+          "BATTERY_WEAK_CELL": 1.0,
+          "CAMERA_RIBBON_FAULT": 1.0,
+          "CAMERA_SENSOR_DEAD": 0.0,
+          "CAN_TERMINATION_MISSING": 1.0,
+          "COMPASS_HARD_IRON": 1.0,
+          "COMPASS_INTERFERENCE": 1.0,
+          "ESC_DESYNC": 0.0,
+          "I2C_CONNECTOR_LOOSE": 1.0,
+          "IMU_GYRO_MISCAL": 0.0,
+          "IMU_SENSOR_FAULT": 0.0,
+          "MOTOR_BEARING_DEGRADED": 0.0,
+          "MOTOR_DEAD": 1.0,
+          "MOTOR_WINDING_SHORT": 0.0
+        }
+      },
+      "tfidf": {
+        "top1": 0.4414,
+        "top3": 0.7857,
+        "per_fault_top1": {
+          "BATTERY_HIGH_IR": 0.0,
+          "BATTERY_WEAK_CELL": 1.0,
+          "CAMERA_RIBBON_FAULT": 1.0,
+          "CAMERA_SENSOR_DEAD": 0.0,
+          "CAN_TERMINATION_MISSING": 0.3,
+          "COMPASS_HARD_IRON": 1.0,
+          "COMPASS_INTERFERENCE": 1.0,
+          "ESC_DESYNC": 0.0,
+          "I2C_CONNECTOR_LOOSE": 0.88,
+          "IMU_GYRO_MISCAL": 0.0,
+          "IMU_SENSOR_FAULT": 0.0,
+          "MOTOR_BEARING_DEGRADED": 0.0,
+          "MOTOR_DEAD": 1.0,
+          "MOTOR_WINDING_SHORT": 0.0
+        }
+      }
+    }
+  },
+  "command": "python -m eval.retrieval_eval --seeds 50 --out eval/results/sample/retrieval.json"
+}
