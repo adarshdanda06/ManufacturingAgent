@@ -68,10 +68,13 @@ class Observation(BaseModel):
 
 def _plan_schema(tool_names: tuple[str, ...], name: str) -> type[BaseModel]:
     """Build the plan output schema with ``tool`` restricted to ``tool_names``."""
+    # A Literal built at runtime is not a static type; typing it as Any keeps mypy
+    # versions from disagreeing about which ignore code applies.
+    tool_type: Any = Literal[tool_names]
     model: type[BaseModel] = create_model(
         name,
         thought=(str, ...),
-        tool=(Literal[tool_names], ...),  # type: ignore[valid-type]
+        tool=(tool_type, ...),
         test_name=(str | None, None),
         query=(str | None, None),
         root_cause=(str | None, None),
