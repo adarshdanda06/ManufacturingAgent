@@ -92,7 +92,7 @@ def test_library_has_decoys() -> None:
 def test_library_is_valid_json_without_em_dashes() -> None:
     text = LIBRARY_PATH.read_text()
     json.loads(text)
-    assert "—" not in text
+    assert "\u2014" not in text
 
 
 def test_tokenize() -> None:
