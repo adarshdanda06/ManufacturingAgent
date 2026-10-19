@@ -1,0 +1,21 @@
+# api: factory test station (port 5000); also where the agent and eval run:
+#   docker compose run --rm api python -m eval.run_eval --n 15 --llm mock
+# web: the run viewer (port 8080), reading eval/results from the host.
+services:
+  api:
+    build: .
+    ports: ["5000:5000"]
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      FACTORY_API_URL: http://localhost:5000
+    volumes:
+      - ./eval/results:/app/eval/results
+  web:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    ports: ["8080:8080"]
+    volumes:
+      - ./eval/results:/results:ro

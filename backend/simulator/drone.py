@@ -10,8 +10,9 @@ reproducible, sample, which is how intermittent faults show up.
 from __future__ import annotations
 
 import random
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable
+from typing import Any
 
 from backend.simulator.faults import HEALTHY, REWORK_ACTIONS, Fault, get_fault
 

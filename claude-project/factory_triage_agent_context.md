@@ -14,8 +14,8 @@ A portfolio project for a Manufacturing Software internship at a drone company. 
 | 2. Failure library and retrieval | Done, tested |
 | 3. LangGraph agent (Gemini) | Done, tested with mock LLMs only. Not yet run against real Gemini. |
 | 4. Evaluation harness | Done, tested with the mock LLM. No real eval run yet. |
-| 5. React + TypeScript viewer | Not started |
-| 6. Polish (README, CI, Docker, lint) | Partly: `.env.example` exists. Rest not started. |
+| 5. React + TypeScript viewer | Done: `web/` (Vite, React 19, TS) over `backend/results_api.py`, tested |
+| 6. Polish (README, CI, Docker, lint) | Done: README, ruff + mypy config, GitHub Actions, Docker Compose. README results need the no-library rerun. |
 
 Test suite: `python -m pytest -q` gives `219 passed`.
 
