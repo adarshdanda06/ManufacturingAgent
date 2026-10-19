@@ -1,0 +1,6 @@
+-r ../backend/requirements.txt
+langgraph>=1.2.16,<2
+langchain-core>=1.6.12,<2
+langchain-google-genai>=4.4.2,<5
+pydantic>=2.7,<3
+requests>=2.31,<3
