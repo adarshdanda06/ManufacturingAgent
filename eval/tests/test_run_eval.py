@@ -7,11 +7,11 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
-from backend.simulator.faults import ALL_FAULT_IDS
 import pytest
 
 import eval.run_eval as run_eval
 from agent.llm import LLMResult
+from backend.simulator.faults import ALL_FAULT_IDS
 from eval.run_eval import ThrottledLLM, main, make_scenarios
 
 
@@ -30,7 +30,7 @@ def test_eval_writes_results_summary_and_traces(tmp_path: Path) -> None:
     report = json.loads((out / "results.json").read_text())
     assert set(report["modes"]) == {"library", "no_library"}
     assert report["command"].startswith("python -m eval.run_eval --n 15 --seed 1")
-    for mode, s in report["modes"].items():
+    for s in report["modes"].values():
         assert s["n"] == 15
         assert 0.0 <= s["accuracy"] <= 1.0
         assert sum(f["n"] for f in s["per_fault"].values()) == 15

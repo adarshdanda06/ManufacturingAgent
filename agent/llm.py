@@ -11,8 +11,9 @@ from __future__ import annotations
 
 import os
 import re
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
-from typing import Any, Callable, Protocol, Sequence, TypeVar
+from typing import Any, Protocol, TypeVar
 
 from langchain_core.messages import BaseMessage
 from pydantic import BaseModel, ValidationError

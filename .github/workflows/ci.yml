@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: pip install -r agent/requirements.txt -r backend/requirements-dev.txt
+      - run: ruff check .
+      - run: mypy
+      - run: python -m pytest -q
+      - name: Smoke eval with the rule-based mock LLM (plumbing check, not agent results)
+        run: python -m eval.run_eval --n 10 --llm mock --out eval/results/ci-smoke
+      - uses: actions/upload-artifact@v4
+        with:
+          name: smoke-eval
+          path: eval/results/ci-smoke/summary.md
+
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose build
