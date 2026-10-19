@@ -1,0 +1,411 @@
+{
+  "run_id": "library-0010",
+  "unit_id": "U-91cc7e590a",
+  "agent": {
+    "model": "gemini-3.5-flash-lite",
+    "config": {
+      "max_steps": 12,
+      "time_budget_s": 180.0,
+      "use_library": true,
+      "retriever": "bm25",
+      "top_k": 3
+    }
+  },
+  "started_at": "2026-10-19T18:13:41.975222+00:00",
+  "duration_s": 207.678,
+  "stop_reason": "proposed",
+  "final": {
+    "root_cause": "CAMERA_RIBBON_FAULT",
+    "confidence": 0.85,
+    "recommended_rework": {
+      "action": "reseat_camera_ribbon",
+      "target": null
+    },
+    "evidence": [
+      {
+        "step": 2,
+        "test_name": "power_on_selftest",
+        "run_index": 0,
+        "passed": false,
+        "failures": [
+          "camera sensor ID read failed"
+        ],
+        "readings": {
+          "boot_time_ms": 1790.0,
+          "can_nodes_found": 4.0,
+          "uart_devices_found": [
+            "camera_ctrl"
+          ],
+          "camera_sensor_id_read": false,
+          "i2c_devices_found": [
+            "imu",
+            "compass"
+          ],
+          "boot_ok": true
+        }
+      },
+      {
+        "step": 3,
+        "test_name": "camera_selftest",
+        "run_index": 0,
+        "passed": false,
+        "failures": [
+          "sensor ID not readable",
+          "frame rate 0.0 fps < 28"
+        ],
+        "readings": {
+          "sensor_id_ok": false,
+          "self_test_pass": false,
+          "frame_rate_fps": 0.0,
+          "csi_crc_errors": 0.0
+        }
+      }
+    ]
+  },
+  "rework_result": {
+    "unit_id": "U-91cc7e590a",
+    "action": "reseat_camera_ribbon",
+    "failing_tests": [
+      "power_on_selftest",
+      "camera_selftest"
+    ],
+    "cost_s": 300.0,
+    "target": "",
+    "suite_passed": false,
+    "applied": true
+  },
+  "totals": {
+    "tool_calls": 6,
+    "tests_run": 3,
+    "test_time_s": 25.0,
+    "llm_calls": 10,
+    "input_tokens": 20322,
+    "output_tokens": 3555
+  },
+  "errors": [],
+  "steps": [
+    {
+      "step": 1,
+      "thought": "I will list all available tests to understand the test suite and choose the cheapest and most informative initial tests.",
+      "tool": "list_tests",
+      "args": {},
+      "result": {
+        "unit_id": "U-91cc7e590a",
+        "tests": [
+          {
+            "name": "power_on_selftest",
+            "subsystem": "system",
+            "description": "Boot the unit and enumerate devices on I2C, UART and CAN.",
+            "cost_s": 5.0
+          },
+          {
+            "name": "battery_rest_check",
+            "subsystem": "battery",
+            "description": "Read pack and per-cell voltages at rest.",
+            "cost_s": 5.0
+          },
+          {
+            "name": "esc_telemetry",
+            "subsystem": "esc",
+            "description": "Read ESC telemetry: sync errors, packet loss, back-EMF detection.",
+            "cost_s": 10.0
+          },
+          {
+            "name": "compass_static",
+            "subsystem": "compass",
+            "description": "Compare compass heading to the fixture reference with motors off.",
+            "cost_s": 10.0
+          },
+          {
+            "name": "harness_continuity",
+            "subsystem": "harness",
+            "description": "Measure per-bus continuity resistance and CAN termination.",
+            "cost_s": 15.0
+          },
+          {
+            "name": "camera_selftest",
+            "subsystem": "camera",
+            "description": "Run camera built-in self test and measure frame rate and CSI errors.",
+            "cost_s": 15.0
+          },
+          {
+            "name": "imu_static",
+            "subsystem": "imu",
+            "description": "Log 1000 IMU samples on the static fixture: gyro bias, accel noise, dropouts.",
+            "cost_s": 20.0
+          },
+          {
+            "name": "motor_spin_test",
+            "subsystem": "motors",
+            "description": "Spin all motors at 50 percent throttle: current, RPM, RPM jitter, temp.",
+            "cost_s": 30.0
+          },
+          {
+            "name": "compass_motor_interference",
+            "subsystem": "compass",
+            "description": "Sweep throttle 0-75 percent and log compass heading deviation.",
+            "cost_s": 40.0
+          },
+          {
+            "name": "battery_load_test",
+            "subsystem": "battery",
+            "description": "Apply a 20 A load and measure sag, cell imbalance, internal resistance.",
+            "cost_s": 60.0
+          }
+        ]
+      },
+      "test_time_s": 0.0,
+      "observation": "Station offers 10 tests.",
+      "hypotheses": []
+    },
+    {
+      "step": 2,
+      "thought": "I will run the power_on_selftest to quickly check all communication buses and subsystems at a very low cost.",
+      "tool": "run_test",
+      "args": {
+        "test_name": "power_on_selftest"
+      },
+      "result": {
+        "unit_id": "U-91cc7e590a",
+        "test_name": "power_on_selftest",
+        "cost_s": 5.0,
+        "readings": {
+          "boot_time_ms": 1790.0,
+          "can_nodes_found": 4.0,
+          "uart_devices_found": [
+            "camera_ctrl"
+          ],
+          "camera_sensor_id_read": false,
+          "i2c_devices_found": [
+            "imu",
+            "compass"
+          ],
+          "boot_ok": true
+        },
+        "failures": [
+          "camera sensor ID read failed"
+        ],
+        "unit_total_test_time_s": 5.0,
+        "passed": false,
+        "run_index": 0
+      },
+      "test_time_s": 5.0,
+      "observation": "The power_on_selftest passed boot, CAN nodes, UART, and I2C devices, but failed to read the camera sensor ID, pointing to a camera hardware or connection issue.",
+      "hypotheses": [
+        {
+          "root_cause_code": "CAMERA_RIBBON_FAULT",
+          "confidence": 0.6,
+          "rationale": "Failure to read camera sensor ID during power-on selftest is commonly caused by a loose or damaged camera CSI ribbon cable."
+        },
+        {
+          "root_cause_code": "CAMERA_SENSOR_DEAD",
+          "confidence": 0.4,
+          "rationale": "Failure to read the camera sensor ID could alternatively indicate a dead camera sensor module."
+        }
+      ]
+    },
+    {
+      "step": 3,
+      "thought": "I will run the camera_selftest to gather more specific telemetry on the camera CSI errors and frame rate, which will help distinguish between a ribbon cable fault and a dead sensor.",
+      "tool": "run_test",
+      "args": {
+        "test_name": "camera_selftest"
+      },
+      "result": {
+        "unit_id": "U-91cc7e590a",
+        "test_name": "camera_selftest",
+        "cost_s": 15.0,
+        "readings": {
+          "sensor_id_ok": false,
+          "self_test_pass": false,
+          "frame_rate_fps": 0.0,
+          "csi_crc_errors": 0.0
+        },
+        "failures": [
+          "sensor ID not readable",
+          "frame rate 0.0 fps < 28"
+        ],
+        "unit_total_test_time_s": 20.0,
+        "passed": false,
+        "run_index": 0
+      },
+      "test_time_s": 20.0,
+      "observation": "The camera_selftest failed with a zero frame rate and unreadable sensor ID, confirming a camera subsystem failure. This points to either a ribbon cable fault or a dead camera sensor module.",
+      "hypotheses": [
+        {
+          "root_cause_code": "CAMERA_RIBBON_FAULT",
+          "confidence": 0.7,
+          "rationale": "Inability to read sensor ID and zero frame rate commonly stems from a loose or damaged CSI ribbon cable."
+        },
+        {
+          "root_cause_code": "CAMERA_SENSOR_DEAD",
+          "confidence": 0.3,
+          "rationale": "An unreadable sensor ID and dead video output can also indicate a failed camera sensor module."
+        }
+      ]
+    },
+    {
+      "step": 4,
+      "thought": "Checking remaining subsystems to ensure no other hidden faults exist.",
+      "tool": "run_test",
+      "args": {
+        "test_name": "battery_rest_check"
+      },
+      "result": {
+        "unit_id": "U-91cc7e590a",
+        "test_name": "battery_rest_check",
+        "passed": true,
+        "cost_s": 5.0,
+        "readings": {
+          "cell_voltages_v": [
+            4.153,
+            4.16,
+            4.149,
+            4.146
+          ],
+          "pack_voltage_v": 16.608,
+          "cell_imbalance_v": 0.014
+        },
+        "unit_total_test_time_s": 25.0,
+        "failures": [],
+        "run_index": 0
+      },
+      "test_time_s": 25.0,
+      "observation": "Battery rest check passed with normal cell voltages and minimal imbalance. This leaves the camera subsystem as the sole failing area, with confirmed unreadable sensor ID and zero frame rate.",
+      "hypotheses": [
+        {
+          "root_cause_code": "CAMERA_RIBBON_FAULT",
+          "confidence": 0.8,
+          "rationale": "Camera selftest and power-on selftest show zero frame rate and completely unreadable sensor ID, which is most frequently caused by an unseated or damaged CSI ribbon cable."
+        },
+        {
+          "root_cause_code": "CAMERA_SENSOR_DEAD",
+          "confidence": 0.2,
+          "rationale": "Total lack of communication and zero frame rate could also indicate a dead camera sensor module, though ribbon cable faults are more common."
+        }
+      ]
+    },
+    {
+      "step": 5,
+      "thought": "I will search the failure library for camera sensor ID read failures and zero frame rates to see if ribbon faults and dead sensors have distinguishable characteristics in other tests.",
+      "tool": "search_failure_library",
+      "args": {
+        "query": "camera sensor ID read failed frame rate 0"
+      },
+      "result": {
+        "retriever": "bm25",
+        "matches": [
+          {
+            "id": "FL-011",
+            "title": "Camera self-test fails with CSI CRC errors",
+            "subsystem": "camera",
+            "symptom_summary": "Camera sensor ID reads correctly but self test fails. Frame rate below 28 fps and many CSI CRC errors on the data lanes.",
+            "key_tests": [
+              "camera_selftest",
+              "power_on_selftest"
+            ],
+            "root_cause_code": "CAMERA_RIBBON_FAULT",
+            "root_cause": "CSI ribbon cable creased or partially inserted in the connector.",
+            "rework_action": "reseat_camera_ribbon",
+            "rework_notes": "Reseat the ribbon; replace it if creased.",
+            "occurrences": 38,
+            "score": 29.4789
+          },
+          {
+            "id": "FL-020",
+            "title": "Camera frame rate low, no CRC errors",
+            "subsystem": "camera",
+            "symptom_summary": "Camera self test reports frame rate around 15 fps with zero CRC errors and sensor ID OK. Camera firmware version string does not match the release.",
+            "key_tests": [
+              "camera_selftest"
+            ],
+            "root_cause_code": "CAMERA_FIRMWARE_MISMATCH",
+            "root_cause": "Camera module shipped with old firmware set to a low frame rate mode.",
+            "rework_action": null,
+            "rework_notes": "Update camera firmware. Zero CRC errors separates it from a ribbon fault.",
+            "occurrences": 10,
+            "score": 19.3043
+          },
+          {
+            "id": "FL-012",
+            "title": "Camera not detected, no frames",
+            "subsystem": "camera",
+            "symptom_summary": "Power-on self test cannot read the camera sensor ID. Camera self test fails with zero fps and zero CRC errors, meaning no data arrives at all.",
+            "key_tests": [
+              "power_on_selftest",
+              "camera_selftest"
+            ],
+            "root_cause_code": "CAMERA_SENSOR_DEAD",
+            "root_cause": "Dead image sensor on the camera module.",
+            "rework_action": "replace_camera_module",
+            "rework_notes": "Replace the camera module.",
+            "occurrences": 11,
+            "score": 17.9294
+          }
+        ]
+      },
+      "test_time_s": 25.0,
+      "observation": "The unit exhibits a completely unresponsive camera with unreadable sensor ID and zero frame rate, ruling out firmware or CRC communication errors and pointing directly to either a disconnected ribbon cable or a dead camera sensor module.",
+      "hypotheses": [
+        {
+          "root_cause_code": "CAMERA_RIBBON_FAULT",
+          "confidence": 0.8,
+          "rationale": "A total lack of sensor communication (unreadable ID and zero frames with zero CRC errors) is classically caused by a loose or unseated CSI ribbon cable."
+        },
+        {
+          "root_cause_code": "CAMERA_SENSOR_DEAD",
+          "confidence": 0.2,
+          "rationale": "An internal hardware failure of the image sensor itself could also produce a complete lack of response and zero frame rate."
+        }
+      ]
+    },
+    {
+      "step": 6,
+      "thought": "I have confirmed the camera has no communication (sensor ID unreadable, 0 fps, 0 CRC errors). To differentiate between a ribbon fault and a dead sensor module, I will inspect the other subsystems to make sure no other failures exist, and since camera_selftest and power_on_selftest both isolate this, I am confident in proposing to reseat the camera ribbon first.",
+      "tool": "propose_rework",
+      "args": {
+        "action": "reseat_camera_ribbon",
+        "target": null
+      },
+      "result": {
+        "unit_id": "U-91cc7e590a",
+        "action": "reseat_camera_ribbon",
+        "failing_tests": [
+          "power_on_selftest",
+          "camera_selftest"
+        ],
+        "cost_s": 300.0,
+        "target": "",
+        "suite_passed": false,
+        "applied": true
+      },
+      "test_time_s": 25.0,
+      "observation": "Rework applied; full suite passed: False.",
+      "hypotheses": [
+        {
+          "root_cause_code": "CAMERA_RIBBON_FAULT",
+          "confidence": 0.8,
+          "rationale": "A total lack of sensor communication (unreadable ID and zero frames with zero CRC errors) is classically caused by a loose or unseated CSI ribbon cable."
+        },
+        {
+          "root_cause_code": "CAMERA_SENSOR_DEAD",
+          "confidence": 0.2,
+          "rationale": "An internal hardware failure of the image sensor itself could also produce a complete lack of response and zero frame rate."
+        }
+      ]
+    }
+  ],
+  "mode": "library",
+  "scenario_index": 10,
+  "ground_truth": {
+    "fault_id": "CAMERA_SENSOR_DEAD",
+    "unit_seed": 439499,
+    "target": null,
+    "rework_action": "replace_camera_module"
+  },
+  "score": {
+    "predicted": "CAMERA_RIBBON_FAULT",
+    "correct": false,
+    "rework_fixed_unit": false
+  }
+}
