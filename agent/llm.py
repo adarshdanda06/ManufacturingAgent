@@ -54,18 +54,19 @@ class LLM(Protocol):
 class GeminiLLM:
     """Gemini chat model with native JSON-schema structured output.
 
-    Reads ``GOOGLE_API_KEY`` from the environment. The model name comes from
+    Reads ``GOOGLE_API_KEY`` (or ``GEMINI_API_KEY``) from the environment. The model name comes from
     the ``model`` argument, then ``GEMINI_MODEL``, then ``DEFAULT_MODEL``.
     """
 
     def __init__(self, model: str | None = None, temperature: float = 0.0, max_retries: int = 3) -> None:
-        if not os.environ.get("GOOGLE_API_KEY"):
-            raise LLMError("GOOGLE_API_KEY is not set")
+        api_key = os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY")
+        if not api_key:
+            raise LLMError("GOOGLE_API_KEY (or GEMINI_API_KEY) is not set")
         from langchain_google_genai import ChatGoogleGenerativeAI
 
         self.model_name = model or os.environ.get("GEMINI_MODEL") or DEFAULT_MODEL
         self._chat = ChatGoogleGenerativeAI(
-            model=self.model_name, temperature=temperature, max_retries=max_retries
+            model=self.model_name, temperature=temperature, max_retries=max_retries, google_api_key=api_key
         )
 
     def structured(
