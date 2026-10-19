@@ -11,6 +11,7 @@ the agent the unit ID alone, and attaches the truth to the trace afterwards.
 Usage:
     python -m eval.run_eval --n 60 --seed 7 --concurrency 4
     python -m eval.run_eval --n 15 --llm mock --modes library   # plumbing check only
+    python -m eval.run_eval --model gemini-3.5-flash-lite --rpm 8 --modes library   # free-tier quota
 """
 
 from __future__ import annotations
@@ -18,6 +19,8 @@ from __future__ import annotations
 import argparse
 import json
 import random
+import re
+import time
 import shlex
 import threading
 import statistics
@@ -58,6 +61,44 @@ def make_scenarios(n: int, seed: int) -> list[Scenario]:
     labels = [ALL_FAULT_IDS[i % len(ALL_FAULT_IDS)] for i in range(n)]
     rng.shuffle(labels)
     return [Scenario(i, f, rng.randrange(1_000_000)) for i, f in enumerate(labels)]
+
+
+class ThrottledLLM:
+    """Wraps an LLM to stay under a requests-per-minute quota.
+
+    Spaces calls at least ``60 / rpm`` seconds apart across all threads. On a
+    per-minute 429 it sleeps the server's suggested delay and retries; a
+    per-day 429 is raised immediately since waiting will not help.
+    """
+
+    def __init__(self, inner: LLM, rpm: float, max_waits: int = 6) -> None:
+        self.inner = inner
+        self.model_name = inner.model_name
+        self.interval = 60.0 / rpm
+        self.max_waits = max_waits
+        self._lock = threading.Lock()
+        self._next = 0.0
+
+    def _slot(self) -> None:
+        with self._lock:
+            now = time.monotonic()
+            wait = max(0.0, self._next - now)
+            self._next = max(now, self._next) + self.interval
+        if wait:
+            time.sleep(wait)
+
+    def structured(self, schema, messages, context=None):  # type: ignore[no-untyped-def]
+        for attempt in range(self.max_waits + 1):
+            self._slot()
+            try:
+                return self.inner.structured(schema, messages, context)
+            except Exception as exc:
+                msg = str(exc)
+                if "RESOURCE_EXHAUSTED" not in msg or "PerDay" in msg or attempt == self.max_waits:
+                    raise
+                m = re.search(r"retry in ([0-9.]+)s", msg)
+                time.sleep((float(m.group(1)) if m else 30.0) + 1.0)
+        raise AssertionError("unreachable")
 
 
 def _expected_rework(fault_id: str) -> str:
@@ -229,6 +270,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--time-budget", type=float, default=180.0)
     ap.add_argument("--price-in", type=float, default=None, help="USD per 1M input tokens, for the cost estimate.")
     ap.add_argument("--price-out", type=float, default=None, help="USD per 1M output tokens, for the cost estimate.")
+    ap.add_argument("--rpm", type=float, default=None, help="Cap model requests per minute (free-tier quotas).")
     ap.add_argument("--out", type=Path, default=None, help="Output directory (default eval/results/<timestamp>).")
     a = ap.parse_args(argv)
 
@@ -236,6 +278,8 @@ def main(argv: list[str] | None = None) -> int:
     created = datetime.now(timezone.utc)
     out = a.out or RESULTS_DIR / created.strftime("%Y%m%dT%H%M%SZ")
     llm = make_llm(a.llm, a.model)
+    if a.rpm:
+        llm = ThrottledLLM(llm, a.rpm)
     scenarios = make_scenarios(a.n, a.seed)
     app = create_app()
 

@@ -9,3 +9,4 @@ web/dist/
 .env
 eval/results/*
 !eval/results/sample/
+!eval/results/gemini-3.5-flash-lite/

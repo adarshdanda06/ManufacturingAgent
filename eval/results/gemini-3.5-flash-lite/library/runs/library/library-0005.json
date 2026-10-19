@@ -1,0 +1,501 @@
+{
+  "run_id": "library-0005",
+  "unit_id": "U-961184914a",
+  "agent": {
+    "model": "gemini-3.5-flash-lite",
+    "config": {
+      "max_steps": 12,
+      "time_budget_s": 180.0,
+      "use_library": true,
+      "retriever": "bm25",
+      "top_k": 3
+    }
+  },
+  "started_at": "2026-10-19T18:05:49.664400+00:00",
+  "duration_s": 210.161,
+  "stop_reason": "proposed",
+  "final": {
+    "root_cause": "COMPASS_INTERFERENCE",
+    "confidence": 0.99,
+    "recommended_rework": {
+      "action": "reroute_compass_wiring",
+      "target": null
+    },
+    "evidence": [
+      {
+        "step": 5,
+        "test_name": "compass_static",
+        "run_index": 0,
+        "passed": false,
+        "failures": [
+          "heading error -7.97 deg exceeds 5.0"
+        ],
+        "readings": {
+          "heading_error_deg": -7.97,
+          "field_magnitude_ut": 51.28,
+          "read_errors": 0.0
+        }
+      },
+      {
+        "step": 6,
+        "test_name": "compass_motor_interference",
+        "run_index": 0,
+        "passed": false,
+        "failures": [
+          "heading deviation changes 25.41 deg with throttle (limit 4.0)"
+        ],
+        "readings": {
+          "sweep": [
+            {
+              "deviation_deg": -0.34,
+              "throttle_pct": 0.0
+            },
+            {
+              "deviation_deg": -7.4,
+              "throttle_pct": 25.0
+            },
+            {
+              "deviation_deg": -16.72,
+              "throttle_pct": 50.0
+            },
+            {
+              "deviation_deg": -25.75,
+              "throttle_pct": 75.0
+            }
+          ],
+          "max_deviation_change_deg": 25.41
+        }
+      }
+    ]
+  },
+  "rework_result": {
+    "unit_id": "U-961184914a",
+    "action": "reroute_compass_wiring",
+    "suite_passed": true,
+    "cost_s": 300.0,
+    "target": "",
+    "failing_tests": [],
+    "applied": true
+  },
+  "totals": {
+    "tool_calls": 8,
+    "tests_run": 6,
+    "test_time_s": 90.0,
+    "llm_calls": 14,
+    "input_tokens": 31736,
+    "output_tokens": 1850
+  },
+  "errors": [],
+  "steps": [
+    {
+      "step": 1,
+      "thought": "I will list all available tests to see what station checks we can perform on the drone.",
+      "tool": "list_tests",
+      "args": {},
+      "result": {
+        "unit_id": "U-961184914a",
+        "tests": [
+          {
+            "name": "power_on_selftest",
+            "subsystem": "system",
+            "description": "Boot the unit and enumerate devices on I2C, UART and CAN.",
+            "cost_s": 5.0
+          },
+          {
+            "name": "battery_rest_check",
+            "subsystem": "battery",
+            "description": "Read pack and per-cell voltages at rest.",
+            "cost_s": 5.0
+          },
+          {
+            "name": "esc_telemetry",
+            "subsystem": "esc",
+            "description": "Read ESC telemetry: sync errors, packet loss, back-EMF detection.",
+            "cost_s": 10.0
+          },
+          {
+            "name": "compass_static",
+            "subsystem": "compass",
+            "description": "Compare compass heading to the fixture reference with motors off.",
+            "cost_s": 10.0
+          },
+          {
+            "name": "harness_continuity",
+            "subsystem": "harness",
+            "description": "Measure per-bus continuity resistance and CAN termination.",
+            "cost_s": 15.0
+          },
+          {
+            "name": "camera_selftest",
+            "subsystem": "camera",
+            "description": "Run camera built-in self test and measure frame rate and CSI errors.",
+            "cost_s": 15.0
+          },
+          {
+            "name": "imu_static",
+            "subsystem": "imu",
+            "description": "Log 1000 IMU samples on the static fixture: gyro bias, accel noise, dropouts.",
+            "cost_s": 20.0
+          },
+          {
+            "name": "motor_spin_test",
+            "subsystem": "motors",
+            "description": "Spin all motors at 50 percent throttle: current, RPM, RPM jitter, temp.",
+            "cost_s": 30.0
+          },
+          {
+            "name": "compass_motor_interference",
+            "subsystem": "compass",
+            "description": "Sweep throttle 0-75 percent and log compass heading deviation.",
+            "cost_s": 40.0
+          },
+          {
+            "name": "battery_load_test",
+            "subsystem": "battery",
+            "description": "Apply a 20 A load and measure sag, cell imbalance, internal resistance.",
+            "cost_s": 60.0
+          }
+        ]
+      },
+      "test_time_s": 0.0,
+      "observation": "Station offers 10 tests.",
+      "hypotheses": []
+    },
+    {
+      "step": 2,
+      "thought": "I will run the power_on_selftest to quickly check all communication buses and initial boot status as the cheapest first step.",
+      "tool": "run_test",
+      "args": {
+        "test_name": "power_on_selftest"
+      },
+      "result": {
+        "unit_id": "U-961184914a",
+        "test_name": "power_on_selftest",
+        "passed": true,
+        "cost_s": 5.0,
+        "readings": {
+          "boot_time_ms": 1932.0,
+          "can_nodes_found": 4.0,
+          "uart_devices_found": [
+            "camera_ctrl"
+          ],
+          "camera_sensor_id_read": true,
+          "i2c_devices_found": [
+            "imu",
+            "compass"
+          ],
+          "boot_ok": true
+        },
+        "unit_total_test_time_s": 5.0,
+        "failures": [],
+        "run_index": 0
+      },
+      "test_time_s": 5.0,
+      "observation": "The initial power_on_selftest passed successfully with all expected I2C, UART, CAN, and camera devices enumerated correctly. Because all checked subsystems appear healthy so far, we must test all remaining subsystems to confirm a healthy unit or discover a latent fault.",
+      "hypotheses": [
+        {
+          "root_cause_code": "HEALTHY",
+          "confidence": 0.5,
+          "rationale": "Initial power-on selftest passed without any failures, indicating a potentially healthy unit."
+        }
+      ]
+    },
+    {
+      "step": 3,
+      "thought": "I will run battery_rest_check to verify battery voltage levels and cell balance as the next subsystem check.",
+      "tool": "run_test",
+      "args": {
+        "test_name": "battery_rest_check"
+      },
+      "result": {
+        "unit_id": "U-961184914a",
+        "test_name": "battery_rest_check",
+        "passed": true,
+        "cost_s": 5.0,
+        "readings": {
+          "cell_voltages_v": [
+            4.156,
+            4.148,
+            4.143,
+            4.149
+          ],
+          "pack_voltage_v": 16.596,
+          "cell_imbalance_v": 0.013
+        },
+        "unit_total_test_time_s": 10.0,
+        "failures": [],
+        "run_index": 0
+      },
+      "test_time_s": 10.0,
+      "observation": "The battery_rest_check passed successfully with balanced cell voltages across all four cells and a normal pack voltage at rest.",
+      "hypotheses": [
+        {
+          "root_cause_code": "HEALTHY",
+          "confidence": 0.6,
+          "rationale": "Both the power-on selftest and battery rest check passed with no abnormal readings, maintaining the hypothesis that the unit may be healthy."
+        },
+        {
+          "root_cause_code": "ESC_THERMAL_DERATE",
+          "confidence": 0.1,
+          "rationale": "ESC telemetry and motor tests have not yet been run to check for thermal or commutation issues."
+        },
+        {
+          "root_cause_code": "IMU_GYRO_MISCAL",
+          "confidence": 0.1,
+          "rationale": "IMU static test has not yet been run to verify sensor bias and calibration."
+        }
+      ]
+    },
+    {
+      "step": 4,
+      "thought": "I will run the esc_telemetry test to check for any ESC commutation sync errors, packet loss, or temperature issues before testing motors.",
+      "tool": "run_test",
+      "args": {
+        "test_name": "esc_telemetry"
+      },
+      "result": {
+        "unit_id": "U-961184914a",
+        "test_name": "esc_telemetry",
+        "passed": true,
+        "cost_s": 10.0,
+        "readings": {
+          "escs": [
+            {
+              "back_emf_detected": true,
+              "temp_c": 33.8,
+              "sync_errors": 0.0,
+              "esc": "esc_1",
+              "packet_loss_pct": 0.1
+            },
+            {
+              "back_emf_detected": true,
+              "temp_c": 38.1,
+              "sync_errors": 0.0,
+              "esc": "esc_2",
+              "packet_loss_pct": 0.03
+            },
+            {
+              "back_emf_detected": true,
+              "temp_c": 34.4,
+              "sync_errors": 1.0,
+              "esc": "esc_3",
+              "packet_loss_pct": 0.05
+            },
+            {
+              "back_emf_detected": true,
+              "temp_c": 34.8,
+              "sync_errors": 1.0,
+              "esc": "esc_4",
+              "packet_loss_pct": 0.07
+            }
+          ]
+        },
+        "unit_total_test_time_s": 20.0,
+        "failures": [],
+        "run_index": 0
+      },
+      "test_time_s": 20.0,
+      "observation": "The esc_telemetry test passed successfully with normal temperatures, packet loss, and zero to minimal sync errors across all four ESCs. We must continue testing remaining subsystems to ensure complete coverage before declaring the unit healthy.",
+      "hypotheses": [
+        {
+          "root_cause_code": "HEALTHY",
+          "confidence": 0.7,
+          "rationale": "Power-on selftest, battery rest check, and ESC telemetry have all passed with no significant anomalies, supporting the healthy unit hypothesis."
+        },
+        {
+          "root_cause_code": "IMU_GYRO_MISCAL",
+          "confidence": 0.1,
+          "rationale": "IMU static test has not yet been executed to verify gyro calibration and noise levels."
+        },
+        {
+          "root_cause_code": "PROP_IMBALANCE",
+          "confidence": 0.1,
+          "rationale": "Motor and propeller tests have not yet been performed to check for mechanical vibration or imbalance."
+        }
+      ]
+    },
+    {
+      "step": 5,
+      "thought": "I will run the compass_static test next to check compass calibration and static heading accuracy against the fixture reference.",
+      "tool": "run_test",
+      "args": {
+        "test_name": "compass_static"
+      },
+      "result": {
+        "unit_id": "U-961184914a",
+        "test_name": "compass_static",
+        "cost_s": 10.0,
+        "readings": {
+          "heading_error_deg": -7.97,
+          "field_magnitude_ut": 51.28,
+          "read_errors": 0.0
+        },
+        "failures": [
+          "heading error -7.97 deg exceeds 5.0"
+        ],
+        "unit_total_test_time_s": 30.0,
+        "passed": false,
+        "run_index": 0
+      },
+      "test_time_s": 30.0,
+      "observation": "The compass_static test failed with a heading error of -7.97 degrees, which exceeds the 5.0 degree threshold. This points directly to a compass issue, ruling out a completely healthy unit.",
+      "hypotheses": [
+        {
+          "root_cause_code": "COMPASS_HARD_IRON",
+          "confidence": 0.5,
+          "rationale": "Static compass heading error exceeds tolerance, indicating possible hard-iron distortion."
+        },
+        {
+          "root_cause_code": "COMPASS_INTERFERENCE",
+          "confidence": 0.4,
+          "rationale": "Heading error in static test could be due to magnetic interference from nearby wiring or components."
+        },
+        {
+          "root_cause_code": "FIXTURE_MAGNETIC_CONTAMINATION",
+          "confidence": 0.1,
+          "rationale": "Fixture magnetic contamination can cause heading errors during compass static tests."
+        }
+      ]
+    },
+    {
+      "step": 6,
+      "thought": "I will run the compass_motor_interference test to see if the heading error worsens under throttle, which helps distinguish between hard-iron distortion and wiring interference.",
+      "tool": "run_test",
+      "args": {
+        "test_name": "compass_motor_interference"
+      },
+      "result": {
+        "unit_id": "U-961184914a",
+        "test_name": "compass_motor_interference",
+        "cost_s": 40.0,
+        "readings": {
+          "sweep": [
+            {
+              "deviation_deg": -0.34,
+              "throttle_pct": 0.0
+            },
+            {
+              "deviation_deg": -7.4,
+              "throttle_pct": 25.0
+            },
+            {
+              "deviation_deg": -16.72,
+              "throttle_pct": 50.0
+            },
+            {
+              "deviation_deg": -25.75,
+              "throttle_pct": 75.0
+            }
+          ],
+          "max_deviation_change_deg": 25.41
+        },
+        "failures": [
+          "heading deviation changes 25.41 deg with throttle (limit 4.0)"
+        ],
+        "unit_total_test_time_s": 70.0,
+        "passed": false,
+        "run_index": 0
+      },
+      "test_time_s": 70.0,
+      "observation": "The compass_motor_interference test failed with a maximum deviation change of 25.41 degrees across throttle sweeps (limit 4.0), alongside a static heading error. This strongly points to magnetic interference from internal power wiring rather than fixed hard-iron distortion or fixture contamination.",
+      "hypotheses": [
+        {
+          "root_cause_code": "COMPASS_INTERFERENCE",
+          "confidence": 0.85,
+          "rationale": "High heading deviation that scales significantly with throttle indicates magnetic interference from power lead current loops near the compass."
+        },
+        {
+          "root_cause_code": "COMPASS_HARD_IRON",
+          "confidence": 0.15,
+          "rationale": "Static heading error could suggest hard-iron distortion, but the strong throttle-dependent deviation makes wiring interference much more likely."
+        }
+      ]
+    },
+    {
+      "step": 7,
+      "thought": "Having identified compass interference scaling with throttle, we cover the remaining untested subsystems (imu, camera, harness, motors, battery load) to ensure no other faults exist before declaring the root cause.",
+      "tool": "run_test",
+      "args": {
+        "test_name": "imu_static"
+      },
+      "result": {
+        "unit_id": "U-961184914a",
+        "test_name": "imu_static",
+        "passed": true,
+        "cost_s": 20.0,
+        "readings": {
+          "samples_dropped": 0.0,
+          "gyro_bias_dps": {
+            "x": -0.023,
+            "y": 0.019,
+            "z": -0.031
+          },
+          "samples_expected": 1000.0,
+          "accel_noise_mg": 2.26
+        },
+        "unit_total_test_time_s": 90.0,
+        "failures": [],
+        "run_index": 0
+      },
+      "test_time_s": 90.0,
+      "observation": "The imu_static test passed successfully, confirming the IMU subsystem is healthy. Combined with the previous compass failures showing severe heading error scaling with motor throttle, the evidence points conclusively to compass interference from nearby power wiring.",
+      "hypotheses": [
+        {
+          "root_cause_code": "COMPASS_INTERFERENCE",
+          "confidence": 0.95,
+          "rationale": "Static heading error combined with large heading deviations scaling directly with throttle confirms magnetic interference from power lead current loops near the compass."
+        },
+        {
+          "root_cause_code": "COMPASS_HARD_IRON",
+          "confidence": 0.05,
+          "rationale": "Static error alone could indicate hard-iron distortion, but the strong throttle-dependent deviation rules this out as the primary cause."
+        }
+      ]
+    },
+    {
+      "step": 8,
+      "thought": "The compass static and motor interference tests definitively show compass interference from power wiring, so no further tests are required before proposing rework.",
+      "tool": "propose_rework",
+      "args": {
+        "action": "reroute_compass_wiring",
+        "target": null
+      },
+      "result": {
+        "unit_id": "U-961184914a",
+        "action": "reroute_compass_wiring",
+        "suite_passed": true,
+        "cost_s": 300.0,
+        "target": "",
+        "failing_tests": [],
+        "applied": true
+      },
+      "test_time_s": 90.0,
+      "observation": "Rework applied; full suite passed: True.",
+      "hypotheses": [
+        {
+          "root_cause_code": "COMPASS_INTERFERENCE",
+          "confidence": 0.95,
+          "rationale": "Static heading error combined with large heading deviations scaling directly with throttle confirms magnetic interference from power lead current loops near the compass."
+        },
+        {
+          "root_cause_code": "COMPASS_HARD_IRON",
+          "confidence": 0.05,
+          "rationale": "Static error alone could indicate hard-iron distortion, but the strong throttle-dependent deviation rules this out as the primary cause."
+        }
+      ]
+    }
+  ],
+  "mode": "library",
+  "scenario_index": 5,
+  "ground_truth": {
+    "fault_id": "COMPASS_INTERFERENCE",
+    "unit_seed": 48845,
+    "target": null,
+    "rework_action": "reroute_compass_wiring"
+  },
+  "score": {
+    "predicted": "COMPASS_INTERFERENCE",
+    "correct": true,
+    "rework_fixed_unit": true
+  }
+}
