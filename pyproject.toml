@@ -5,3 +5,24 @@ requires-python = ">=3.11"
 
 [tool.pytest.ini_options]
 testpaths = ["backend/tests", "agent/tests", "eval/tests"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+extend-exclude = ["backend/proto/*_pb2.py", "backend/proto/*_pb2.pyi", "web"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+# Long lines are allowed where the existing code keeps tables and messages on one line.
+ignore = ["E501", "B905", "UP017"]
+
+[tool.ruff.lint.per-file-ignores]
+# The per-mode job closure runs inside its own loop iteration, so the B023 warning does not apply.
+"eval/run_eval.py" = ["B023", "I001"]
+
+[tool.mypy]
+python_version = "3.11"
+files = ["backend", "agent", "eval"]
+exclude = ['_pb2\.pyi?$', '/tests/']
+ignore_missing_imports = true
+check_untyped_defs = true
