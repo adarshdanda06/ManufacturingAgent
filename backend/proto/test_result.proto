@@ -1,0 +1,53 @@
+// Test station IPC schema.
+//
+// The Flask API builds these messages internally for every test run and
+// converts them to JSON at the HTTP boundary. Regenerate the Python bindings
+// with scripts/gen_proto.sh after editing this file.
+
+syntax = "proto3";
+
+package factory.v1;
+
+import "google/protobuf/struct.proto";
+
+// Static description of one test the station can run.
+message TestSpec {
+  string name = 1;
+  string subsystem = 2;
+  string description = 3;
+  // Simulated station time the test takes, in seconds.
+  double cost_s = 4;
+}
+
+// The list of tests available for a unit.
+message TestCatalog {
+  string unit_id = 1;
+  repeated TestSpec tests = 2;
+}
+
+// Result of running one test on one unit.
+message TestResult {
+  string unit_id = 1;
+  string test_name = 2;
+  bool passed = 3;
+  // Simulated station time consumed by this run, in seconds.
+  double cost_s = 4;
+  // Raw readings. Shape depends on the test (see TestSpec.name).
+  google.protobuf.Struct readings = 5;
+  // Human-readable limit violations; empty when passed is true.
+  repeated string failures = 6;
+  // Zero-based count of previous runs of this test on this unit.
+  uint32 run_index = 7;
+  // Total simulated test time on this unit after this run, in seconds.
+  double unit_total_test_time_s = 8;
+}
+
+// Result of a rework action followed by a full test suite re-run.
+message ReworkResult {
+  string unit_id = 1;
+  string action = 2;
+  string target = 3;
+  bool suite_passed = 4;
+  repeated string failing_tests = 5;
+  double cost_s = 6;
+}
